@@ -66,7 +66,7 @@ public class CustomShapeManager : MonoBehaviour {
 		pathway.shapes = shapeInfoList;
 		pathways.Add(pathway);
 
-		ClearShapes();
+		//ClearShapes();
 	}
 
     public GameObject ShapeFromInfo(ShapeInfo info)

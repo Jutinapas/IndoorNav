@@ -100,7 +100,7 @@ public class CustomShapeManager : MonoBehaviour {
 			shape.GetComponent<Node> ().pos = position;
             Debug.Log(position);
 		}
-		shape.tag = "waypoint";
+		shape.tag = "Waypoint";
 		shape.transform.position = position;
 		shape.transform.rotation = new Quaternion(info.qx, info.qy, info.qz, info.qw);
 		shape.transform.localScale = new Vector3(.3f, .3f, .3f);

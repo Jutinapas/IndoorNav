@@ -16,9 +16,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     public Text destText;
     public Text nameText;
     
-
-    private string mapName = "GenericMap";
-    private string destName = "GenericDest";
+    private string mapName = "Default Map";
+    private string destName = "Default Dest";
 
     private CustomShapeManager shapeManager;
 
@@ -41,7 +40,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
 
     // Use this for initialization
     void Start() {
-
         shapeManager = GetComponent<CustomShapeManager>();
 
         Input.location.Start();
@@ -61,7 +59,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         mFrameUpdated = true;
         mARCamera = camera;
     }
-
 
     private void InitARFrameBuffer() {
         mImage = new UnityARImageFrameData();
@@ -95,6 +92,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 return;
             } else if (!mARKitInit && LibPlacenote.Instance.Initialized()) {
                 mARKitInit = true;
+                statusText.text = "ARKit + placenote Initialized";
                 Debug.Log("ARKit + placenote Initialized");
                 StartSavingMap();
             }
@@ -120,12 +118,13 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 Vector3 pos = player.position;
                 Debug.Log(player.position);
                 pos.y = -.5f;
-                shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), false);
+                shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 0);
             }
         }
     }
 
     public void CreateDestination() {
+        shouldRecordWaypoints = false;
         if (destText.text != null) destName = destText.text;
         shapeManager.AddDestinationShape(destName);
     }
@@ -134,10 +133,12 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         ConfigureSession();
 
         if (!LibPlacenote.Instance.Initialized()) {
+            statusText.text = "SDK not yet initialized";
             Debug.Log("SDK not yet initialized");
             return;
         }
 
+        statusText.text = "Started Session";
         Debug.Log("Started Session");
         LibPlacenote.Instance.StartSession();
 
@@ -145,10 +146,13 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
             LibPlacenote.Instance.StartRecordDataset(
                 (completed, faulted, percentage) => {
                     if (completed) {
+                        statusText.text = "Dataset Upload Complete";
                         Debug.Log("Dataset Upload Complete");
                     } else if (faulted) {
+                        statusText.text = "Dataset Upload Faulted";
                         Debug.Log("Dataset Upload Faulted");
                     } else {
+                        statusText.text = "Dataset Upload: (" + percentage.ToString("F2") + "/1.0)";
                         Debug.Log("Dataset Upload: (" + percentage.ToString("F2") + "/1.0)");
                     }
                 });
@@ -157,11 +161,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     }
 
     private void StartARKit() {
+        statusText.text = "Initializing ARKit";
         Debug.Log("Initializing ARKit");
         Application.targetFrameRate = 60;
         ConfigureSession();
     }
-
 
     private void ConfigureSession() {
 #if !UNITY_EDITOR
@@ -185,11 +189,14 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     }
 
     public void OnNewPlaceClick() {
-
+        Transform player = Camera.main.transform;
+        Vector3 pos = player.position;
+        shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 3);
     }
 
     public void OnNewPathwayClick() {
         //start drop waypoints
+        statusText.text = "Dropping Waypoints!!";
         Debug.Log("Dropping Waypoints!!");
         shouldRecordWaypoints = true;
     }
@@ -201,6 +208,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
 
     void DeleteMaps() {
         if (!LibPlacenote.Instance.Initialized()) {
+            statusText.text = "SDK not yet initialized";
             Debug.Log("SDK not yet initialized");
             ToastManager.ShowToast("SDK not yet initialized", 2f);
             return;
@@ -213,9 +221,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                     foundMap = true;
                     LibPlacenote.Instance.DeleteMap(map.placeId, (deleted, errMsg) => {
                         if (deleted) {
+                            statusText.text = "Deleted ID: " + map.placeId;
                             Debug.Log("Deleted ID: " + map.placeId);
                             SaveCurrentMap();
                         } else {
+                            statusText.text = "Failed to delete ID: " + map.placeId;
                             Debug.Log("Failed to delete ID: " + map.placeId);
                         }
                     });
@@ -232,6 +242,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
             shouldSaveMap = false;
 
             if (!LibPlacenote.Instance.Initialized()) {
+                statusText.text = "SDK not yet initialized";
                 Debug.Log("SDK not yet initialized");
                 ToastManager.ShowToast("SDK not yet initialized", 2f);
                 return;
@@ -241,21 +252,21 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
             LocationInfo locationInfo = Input.location.lastData;
 
             Debug.Log("Saving...");
-            statusText.text = "uploading...";
+            statusText.text = "Uploading...";
             LibPlacenote.Instance.SaveMap(
                 (mapId) => {
                     LibPlacenote.Instance.StopSession();
 
                     LibPlacenote.MapMetadataSettable metadata = new LibPlacenote.MapMetadataSettable();
                     metadata.name = mapName;
+                    statusText.text = "Saved Map Name: " + metadata.name;
                     Debug.Log("Saved Map Name: " + metadata.name);
 
-                    JObject userdata = new JObject();
-                    metadata.userdata = userdata;
+                    JObject placeList = GetComponent<CustomShapeManager>().Places2JSON();
+                    JObject pathList = GetComponent<CustomShapeManager>().Pathways2JSON();
+                    placeList.Merge(pathList, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union});
 
-                    JObject shapeList = GetComponent<CustomShapeManager>().Shapes2JSON();
-
-                    userdata["shapeList"] = shapeList;
+                    metadata.userdata = placeList;
 
                     if (useLocation) {
                         metadata.location = new LibPlacenote.MapLocation();
@@ -269,11 +280,13 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 (completed, faulted, percentage) => {
                     if (completed) {
                         Debug.Log("Upload Complete:" + mCurrMapDetails.name);
-                        statusText.text = "upload complete!!";
+                        statusText.text = "Upload Complete:" + mCurrMapDetails.name;
                     } else if (faulted) {
                         Debug.Log("Upload of Map Named: " + mCurrMapDetails.name + "faulted");
+                        statusText.text = "Upload of Map Named: " + mCurrMapDetails.name + "faulted";
                     } else {
                         Debug.Log("Uploading Map Named: " + mCurrMapDetails.name + "(" + percentage.ToString("F2") + "/1.0)");
+                        statusText.text = "Uploading Map Named: " + mCurrMapDetails.name + "(" + percentage.ToString("F2") + "/1.0)";
                     }
                 }
             );
@@ -292,8 +305,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         } else if (currStatus == LibPlacenote.MappingStatus.LOST) {
             Debug.Log("Searching for position lock");
         } else if (currStatus == LibPlacenote.MappingStatus.WAITING) {
-            if (GetComponent<CustomShapeManager>().shapeObjList.Count != 0) {
-                GetComponent<CustomShapeManager>().ClearShapes();
+            if (GetComponent<CustomShapeManager>().placeObjList.Count != 0) {
+                //GetComponent<CustomShapeManager>().ClearShapes();
             }
         }
     }

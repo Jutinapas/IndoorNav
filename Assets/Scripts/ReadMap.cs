@@ -176,7 +176,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener {
         } else if (currStatus == LibPlacenote.MappingStatus.LOST) {
             Debug.Log("Searching for position lock");
         } else if (currStatus == LibPlacenote.MappingStatus.WAITING) {
-            if (GetComponent<CustomShapeManager>().shapeObjList.Count != 0) {
+            if (GetComponent<CustomShapeManager>().placeObjList.Count != 0) {
                 //GetComponent<CustomShapeManager>().ClearShapes();
             }
         }

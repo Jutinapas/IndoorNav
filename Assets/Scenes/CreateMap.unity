@@ -342,8 +342,11 @@ MonoBehaviour:
   - {fileID: 1417247514451880, guid: 756520d3983b446779ee0b9bbd119c15, type: 2}
   - {fileID: 1160887633394466, guid: eedaac2fc25db4ab99371a7c1f59dd58, type: 2}
   - {fileID: 1078755997285888, guid: f8f67d766d3ce4631a946298773ec89d, type: 2}
-  shapeInfoList: []
-  shapeObjList: []
+  - {fileID: 1417247514451880, guid: 756520d3983b446779ee0b9bbd119c15, type: 2}
+  placeInfoList: []
+  pathInfoList: []
+  placeObjList: []
+  pathObjList: []
 --- !u!114 &101716594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2743,11 +2746,11 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 34
+    m_FontSize: 42
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 3
-    m_MaxSize: 40
+    m_MaxSize: 42
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1

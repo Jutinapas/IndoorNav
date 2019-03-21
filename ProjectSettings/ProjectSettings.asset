@@ -851,9 +851,9 @@ PlayerSettings:
     UNet: 1
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 3
-  cloudProjectId: c2ed9412-a19b-47e3-b866-bbeaf3c5b4c9
-  projectName: Placenote
-  organizationId: matthewhallberg
+  cloudProjectId: 38ea4ca7-8eff-4f34-be99-ac6123dce44e
+  projectName: IndoorNav
+  organizationId: jutinapas
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0

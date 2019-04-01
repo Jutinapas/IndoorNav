@@ -95,7 +95,7 @@ public class CustomShapeManager : MonoBehaviour {
 			shape = Instantiate (ShapePrefabs [2]);
 		} else {
 			shape = Instantiate (ShapePrefabs [info.shapeType]);
-			if (info.shpaeType == 0)
+			if (info.shapeType == 0)
 				shape.tag = "Waypoint";
 			else if (info.shapeType == 3) {
 				shape.tag = "Place";

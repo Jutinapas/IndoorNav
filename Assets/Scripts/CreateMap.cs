@@ -92,8 +92,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 return;
             } else if (!mARKitInit && LibPlacenote.Instance.Initialized()) {
                 mARKitInit = true;
-                statusText.text = "ARKit + placenote Initialized";
-                Debug.Log("ARKit + placenote Initialized");
+                statusText.text = "ARKit and Placenote Initialized";
+                Debug.Log("ARKit and Placenote Initialized");
                 StartSavingMap();
             }
 
@@ -196,8 +196,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
 
     public void OnNewPathwayClick() {
         //start drop waypoints
-        statusText.text = "Dropping Waypoints!!";
-        Debug.Log("Dropping Waypoints!!");
+        statusText.text = "Dropping Waypoints";
+        Debug.Log("Dropping Waypoints");
         shouldRecordWaypoints = true;
     }
 
@@ -282,11 +282,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                         Debug.Log("Upload Complete:" + mCurrMapDetails.name);
                         statusText.text = "Upload Complete:" + mCurrMapDetails.name;
                     } else if (faulted) {
-                        Debug.Log("Upload of Map Named: " + mCurrMapDetails.name + "faulted");
-                        statusText.text = "Upload of Map Named: " + mCurrMapDetails.name + "faulted";
+                        Debug.Log("Upload: " + mCurrMapDetails.name + "faulted");
+                        statusText.text = "Upload: " + mCurrMapDetails.name + "faulted";
                     } else {
-                        Debug.Log("Uploading Map Named: " + mCurrMapDetails.name + "(" + percentage.ToString("F2") + "/1.0)");
-                        statusText.text = "Uploading Map Named: " + mCurrMapDetails.name + "(" + percentage.ToString("F2") + "/1.0)";
+                        Debug.Log("Uploading: " + mCurrMapDetails.name + "(" + percentage.ToString("F2") + "/1.0)");
+                        statusText.text = "Uploading: " + mCurrMapDetails.name + "(" + percentage.ToString("F2") + "/1.0)";
                     }
                 }
             );

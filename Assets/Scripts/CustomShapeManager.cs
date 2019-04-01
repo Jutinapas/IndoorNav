@@ -95,12 +95,17 @@ public class CustomShapeManager : MonoBehaviour {
 			shape = Instantiate (ShapePrefabs [2]);
 		} else {
 			shape = Instantiate (ShapePrefabs [info.shapeType]);
+			if (info.shpaeType == 0)
+				shape.tag = "Waypoint";
+			else if (info.shapeType == 3) {
+				shape.tag = "Place";
+				//shape.GetComponent<TextMesh>()
+			}
 		}
 		if (shape.GetComponent<Node> () != null) {
 			shape.GetComponent<Node> ().pos = position;
             Debug.Log(position);
 		}
-		shape.tag = "waypoint";
 		shape.transform.position = position;
 		shape.transform.rotation = new Quaternion(info.qx, info.qy, info.qz, info.qw);
 		shape.transform.localScale = new Vector3(.3f, .3f, .3f);

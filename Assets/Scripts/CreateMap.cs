@@ -110,7 +110,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 Collider[] hitColliders = Physics.OverlapSphere(player.position, 1f);
                 int i = 0;
                 while (i < hitColliders.Length) {
-                    if (hitColliders[i].CompareTag("waypoint")) {
+                    if (hitColliders[i].CompareTag("Waypoint")) {
                         return;
                     }
                     i++;

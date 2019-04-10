@@ -13,15 +13,16 @@ using Newtonsoft.Json;
 public class CreateMap : MonoBehaviour, PlacenoteListener {
 
     public Text statusText;
-    public Text destText;
-    public Text nameText;
+    public Text destNameText;
+    public Text mapNameText;
     
-    private string mapName = "Default Map";
-    private string destName = "Default Dest";
+    private string mapName;
+    private string destName;
 
     private CustomShapeManager shapeManager;
 
-    private bool shouldRecordWaypoints = false;
+    private bool dropNode = false;
+    private bool overlapNode = false;
     private bool shouldSaveMap = true;
 
     private UnityARSessionNativeInterface mSession;
@@ -104,7 +105,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
 
             LibPlacenote.Instance.SendARFrame(mImage, arkitPosition, arkitQuat, mARCamera.videoParams.screenOrientation);
 
-            if (shouldRecordWaypoints) {
+            if (dropNode) {
                 Transform player = Camera.main.transform;
                 //create waypoints if there are none around
                 Collider[] hitColliders = Physics.OverlapSphere(player.position, 1f);
@@ -124,8 +125,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     }
 
     public void CreateDestination() {
-        shouldRecordWaypoints = false;
-        if (destText.text != null) destName = destText.text;
+        dropNode = false;
+        if (destNameText.text != null) destName = destNameText.text;
         shapeManager.AddDestinationShape(destName);
     }
 
@@ -184,7 +185,21 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
 #endif
     }
 
-    public void OnExitClick() {
+    public void OnToGraphClick() {
+
+    }
+
+    public void OnToPathClick() {
+        statusText.text = "Dropping Waypoints";
+        Debug.Log("Dropping Waypoints");
+        dropNode = true;
+    }
+
+    public void OnToDestClick() {
+
+    }
+
+    public void OnSaveDestClick() {
 
     }
 
@@ -194,15 +209,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 3);
     }
 
-    public void OnNewPathwayClick() {
-        //start drop waypoints
-        statusText.text = "Dropping Waypoints";
-        Debug.Log("Dropping Waypoints");
-        shouldRecordWaypoints = true;
-    }
-
     public void OnSaveMapClick() {
-        if (nameText.text != null) mapName = nameText.text;
+        if (mapNameText.text != null) mapName = mapNameText.text;
         DeleteMaps();
     }
 

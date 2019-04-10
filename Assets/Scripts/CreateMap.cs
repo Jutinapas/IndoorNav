@@ -185,10 +185,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
 #endif
     }
 
-    public void OnToGraphClick() {
-
-    }
-
     public void OnToPathClick() {
         statusText.text = "Dropping Waypoints";
         Debug.Log("Dropping Waypoints");
@@ -200,7 +196,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     }
 
     public void OnSaveDestClick() {
-
+        
     }
 
     public void OnNewPlaceClick() {

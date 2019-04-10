@@ -8,9 +8,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4872432487387244}
-  - component: {fileID: 114848763398544908}
   - component: {fileID: 65097387241351288}
-  - component: {fileID: 114517702106885618}
   m_Layer: 8
   m_Name: Diamond
   m_TagString: Waypoint
@@ -117,31 +115,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2.009786, y: 1, z: 2.0882883}
   m_Center: {x: -0.21466413, y: 0, z: -0.032519102}
---- !u!114 &114517702106885618
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1160887633394466}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f52ea4ebd238041d38b5b00aa7e3034d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pos: {x: 0, y: 0, z: 0}
-  neighbors: []
---- !u!114 &114848763398544908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1160887633394466}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 106cb6f19d9a745b1a2d6d51760d219b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  diamond: {fileID: 1889600940015092}
 --- !u!1 &1835727936811475637
 GameObject:
   m_ObjectHideFlags: 0

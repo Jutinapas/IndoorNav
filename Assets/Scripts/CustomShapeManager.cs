@@ -99,7 +99,9 @@ public class CustomShapeManager : MonoBehaviour {
 				shape.tag = "Waypoint";
 			else if (info.shapeType == 3) {
 				shape.tag = "Place";
-				//shape.GetComponent<TextMesh>()
+				shape.GetComponent<TextMesh>().text = "";
+				shape.GetComponent<TextMesh>().color = Color.red;
+				// testFukk				
 			}
 		}
 		if (shape.GetComponent<Node> () != null) {

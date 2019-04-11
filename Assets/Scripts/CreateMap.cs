@@ -52,11 +52,31 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         LibPlacenote.Instance.RegisterListener(this);
     }
 
-    void OnDisable() {
-        UnityARSessionNativeInterface.ARFrameUpdatedEvent -= ARFrameUpdated;
+    private void StartARKit() {
+        statusText.text = "กำลังเตรียมพร้อม";
+        Debug.Log("กำลังเตรียมพร้อม");
+        Application.targetFrameRate = 60;
+        ConfigureSession();
     }
 
-    private void ARFrameUpdated(UnityARCamera camera) {
+    private void ConfigureSession() {
+        #if !UNITY_EDITOR
+		ARKitWorldTrackingSessionConfiguration config = new ARKitWorldTrackingSessionConfiguration ();
+
+		if (UnityARSessionNativeInterface.IsARKit_1_5_Supported ()) {
+			config.planeDetection = UnityARPlaneDetection.HorizontalAndVertical;
+		} else {
+			config.planeDetection = UnityARPlaneDetection.Horizontal;
+		}
+
+		config.alignment = UnityARAlignment.UnityARAlignmentGravity;
+		config.getPointCloudData = true;
+		config.enableLightEstimation = true;
+		mSession.RunWithConfig (config);
+        #endif
+    }
+
+       private void ARFrameUpdated(UnityARCamera camera) {
         mFrameUpdated = true;
         mARCamera = camera;
     }
@@ -80,6 +100,10 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         mSession.SetCapturePixelData(true, mImage.y.data, mImage.vu.data);
     }
 
+    void OnDisable() {
+        UnityARSessionNativeInterface.ARFrameUpdatedEvent -= ARFrameUpdated;
+    }
+
     // Update is called once per frame
     void Update() {
         if (mFrameUpdated) {
@@ -93,8 +117,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 return;
             } else if (!mARKitInit && LibPlacenote.Instance.Initialized()) {
                 mARKitInit = true;
-                statusText.text = "ARKit and Placenote Initialized";
-                Debug.Log("ARKit and Placenote Initialized");
+                statusText.text = "พร้อมสร้างแผนที่";
+                Debug.Log("พร้อมสร้างแผนที่");
                 StartSavingMap();
             }
 
@@ -107,7 +131,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
 
             if (dropNode) {
                 Transform player = Camera.main.transform;
-                //create waypoints if there are none around
+                //Create waypoints if there are none around
                 Collider[] hitColliders = Physics.OverlapSphere(player.position, 1f);
                 int i = 0;
                 while (i < hitColliders.Length) {
@@ -124,70 +148,40 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         }
     }
 
-    public void CreateDestination() {
-        dropNode = false;
-        if (destNameText.text != null) destName = destNameText.text;
-        shapeManager.AddDestinationShape(destName);
-    }
-
     void StartSavingMap() {
         ConfigureSession();
 
         if (!LibPlacenote.Instance.Initialized()) {
-            statusText.text = "SDK not yet initialized";
-            Debug.Log("SDK not yet initialized");
+            statusText.text = "เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง";
+            Debug.Log("เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง");
             return;
         }
 
-        statusText.text = "Started Session";
-        Debug.Log("Started Session");
+        statusText.text = "เริ่มสร้างแผนที่";
+        Debug.Log("เริ่มสร้างแผนที่");
         LibPlacenote.Instance.StartSession();
 
         if (mReportDebug) {
             LibPlacenote.Instance.StartRecordDataset(
                 (completed, faulted, percentage) => {
                     if (completed) {
-                        statusText.text = "Dataset Upload Complete";
-                        Debug.Log("Dataset Upload Complete");
+                        statusText.text = "เสร็จสิ้นการอัพโหลดข้อมูล";
+                        Debug.Log("เสร็จสิ้นการอัพโหลดข้อมูล");
                     } else if (faulted) {
-                        statusText.text = "Dataset Upload Faulted";
-                        Debug.Log("Dataset Upload Faulted");
+                        statusText.text = "เกิดข้อผิดพลาดระหว่างการอัพโหลด";
+                        Debug.Log("เกิดข้อผิดพลาดระหว่างการอัพโหลด");
                     } else {
-                        statusText.text = "Dataset Upload: (" + percentage.ToString("F2") + "/1.0)";
-                        Debug.Log("Dataset Upload: (" + percentage.ToString("F2") + "/1.0)");
+                        statusText.text = "อัพโหลดข้อมูล: " + (percentage * 100).ToString();
+                        Debug.Log("อัพโหลดข้อมูล: " + (percentage * 100).ToString());
                     }
                 });
-            Debug.Log("Started Debug Report");
+            Debug.Log("เริ่มต้น Debug");
         }
     }
 
-    private void StartARKit() {
-        statusText.text = "Initializing ARKit";
-        Debug.Log("Initializing ARKit");
-        Application.targetFrameRate = 60;
-        ConfigureSession();
-    }
-
-    private void ConfigureSession() {
-#if !UNITY_EDITOR
-		ARKitWorldTrackingSessionConfiguration config = new ARKitWorldTrackingSessionConfiguration ();
-
-		if (UnityARSessionNativeInterface.IsARKit_1_5_Supported ()) {
-			config.planeDetection = UnityARPlaneDetection.HorizontalAndVertical;
-		} else {
-			config.planeDetection = UnityARPlaneDetection.Horizontal;
-		}
-
-		config.alignment = UnityARAlignment.UnityARAlignmentGravity;
-		config.getPointCloudData = true;
-		config.enableLightEstimation = true;
-		mSession.RunWithConfig (config);
-#endif
-    }
-
     public void OnToPathClick() {
-        statusText.text = "Dropping Waypoints";
-        Debug.Log("Dropping Waypoints");
+        statusText.text = "เริ่มสร้างเส้นทาง";
+        Debug.Log("เริ่มสร้างเส้นทาง");
         dropNode = true;
     }
 
@@ -203,6 +197,12 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         Transform player = Camera.main.transform;
         Vector3 pos = player.position;
         shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 3);
+    }
+
+    public void CreateDestination() {
+        dropNode = false;
+        if (destNameText.text != null) destName = destNameText.text;
+        shapeManager.AddDestinationShape(destName);
     }
 
     public void OnSaveMapClick() {

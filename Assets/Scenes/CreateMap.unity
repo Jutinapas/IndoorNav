@@ -822,6 +822,7 @@ MonoBehaviour:
   - {fileID: 1160887633394466, guid: eedaac2fc25db4ab99371a7c1f59dd58, type: 2}
   - {fileID: 1078755997285888, guid: f8f67d766d3ce4631a946298773ec89d, type: 2}
   - {fileID: 1503411527038776, guid: 803cd0f1738e645c984ac4ef7cb7e5a6, type: 2}
+  - {fileID: 1088472916570732, guid: 2fb6925c40ae28d48ba5f0e23edfd914, type: 2}
   placeInfoList: []
   pathInfoList: []
   placeObjList: []
@@ -1425,7 +1426,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &822145073
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2168,40 +2169,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1268125206}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 822145072}
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 577520296}
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 101716596}
-        m_MethodName: OnToDestClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
+      m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &1268125206
@@ -2401,7 +2369,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u0E1B\u0E25\u0E32\u0E22\u0E17\u0E32\u0E07"
+  m_Text: "\u0E22\u0E49\u0E2D\u0E19\u0E01\u0E25\u0E31\u0E1A"
 --- !u!222 &1345877869
 CanvasRenderer:
   m_ObjectHideFlags: 0

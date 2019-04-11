@@ -7,10 +7,6 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 
-/*========================================
- * Main Class for Managing Markers
-======================================== */
-
 public class CustomShapeManager : MonoBehaviour {
 
 	public NavController navController;
@@ -31,12 +27,66 @@ public class CustomShapeManager : MonoBehaviour {
 	public List<GameObject> placeObjList = new List<GameObject>();
 	[HideInInspector]
     public List<GameObject> pathObjList = new List<GameObject>();
+	public List<GameObject> nodeObjList = new List<GameObject>();
 
 	private bool shapesLoaded = false;
 
-    //-------------------------------------------------
-    // All shape management functions (add shapes, save shapes to metadata etc.
-    //-------------------------------------------------
+	private int TYPE_NODE = 0;
+	private int TYPE_EDGE = 4;
+	private float MAX_DISTANCE = 1.1f;
+
+	public void Createshape(Vector3 position) {
+		ShapeInfo shapeInfo = new ShapeInfo();
+        shapeInfo.px = position.x;
+        shapeInfo.py = position.y;
+        shapeInfo.pz = position.z;
+        shapeInfo.qx = 0;
+        shapeInfo.qy = 0;
+        shapeInfo.qz = 0;
+        shapeInfo.qw = 0;
+		shapeInfo.shapeType = TYPE_NODE.GetHashCode();
+
+		GameObject shape = shapeFromInfo(shapeInfo);
+		
+		Node node = shape.GetComponent<Node>();
+		node.FindNeighbors(MAX_DISTANCE);
+		List<Node> neighbors = node.neighbors;
+		List<GameObject> edges = new List<GameObject>();
+
+		if (neighbors.Count > 0) {
+			foreach (Node neighbor in neighbors) {
+				GameObject edge = Instantiate(ShapePrefabs[TYPE_EDGE]);
+				LineRenderer lineRenderer = edge.GetComponent<LineRenderer>();
+				lineRenderer.SetPosition(0, position);
+				lineRenderer.SetPosition(1, neighbor.pos);
+				edges.Add(edge);
+			}
+
+		}
+
+
+	}
+
+	public GameObject shapeFromInfo(ShapeInfo info) {
+		GameObject shape;
+		Vector3 position = new Vector3 (info.px, info.py, info.pz);
+
+		if (SceneManager.GetActiveScene ().name == "ReadMap" && info.shapeType == 0) {
+			shape = Instantiate (ShapePrefabs [2]);
+		}  else {
+			shape = Instantiate (ShapePrefabs [info.shapeType]);
+		}
+		if (shape.GetComponent<Node> () != null) {
+			shape.GetComponent<Node> ().pos = position;
+            Debug.Log(position);
+		}
+		shape.tag = "Waypoint";
+		shape.transform.position = position;
+		shape.transform.rotation = new Quaternion(info.qx, info.qy, info.qz, info.qw);
+		shape.transform.localScale = new Vector3(.3f, .3f, .3f);
+
+		return shape;
+	}
 
     public void AddShape(Vector3 shapePosition, Quaternion shapeRotation, int shapeType)
     {

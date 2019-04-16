@@ -112,6 +112,25 @@ public class CustomShapeManager : MonoBehaviour {
 		}
 	}
 
+	public void CreateDestination (GameObject node, string destName) {
+		//change last waypoint to diamond
+		ShapeInfo lastInfo = pathInfoList [pathInfoList.Count - 1];
+		lastInfo.shapeType = 1.GetHashCode ();
+		GameObject shape = ShapeFromInfo(lastInfo);
+		shape.GetComponent<DiamondBehavior> ().Activate (true);
+		//destroy last shape
+		Destroy (pathObjList [pathObjList.Count - 1]);
+		//add new shape
+		pathObjList.Add (shape);
+		
+		Pathway pathway = new Pathway();
+		pathway.name = destName;
+		pathway.shapes = pathInfoList;
+		pathways.Add(pathway);
+
+		//ClearPaths();
+	}
+
     public void AddShape(Vector3 shapePosition, Quaternion shapeRotation, int shapeType)
     {
         ShapeInfo shapeInfo = new ShapeInfo();

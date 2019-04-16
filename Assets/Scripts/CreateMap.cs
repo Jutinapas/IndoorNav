@@ -42,6 +42,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     private RaycastHit hit;
     private Ray ray;
 
+    public GameObject mapping;
+    public GameObject destNaming;
+
+    private GameObject currentNode;
+
     // Use this for initialization
     void Start() {
         shapeManager = GetComponent<CustomShapeManager>();
@@ -154,8 +159,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                     Ray ray = Camera.main.ScreenPointToRay( Input.GetTouch(0).position );
                     RaycastHit hit;
 
-                    if (Physics.Raycast(ray, out hit) && hit.transform.gameObject.tag == "") {
+                    if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Waypoint") {
                         //Something
+                        mapping.SetActive(false);
+                        destNaming.SetActive(true);
+                        currentNode = hit.transform.gameObject;
                     }
                 }
             }
@@ -212,12 +220,13 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         Debug.Log("ย้อนการสร้างเส้นทาง");
     }
 
-    public void OnToDestClick() {
-        
-    }
-
     public void OnSaveDestClick() {
-        
+        if (destNameText.text != null && currentNode != null) {
+            destName = destNameText.text;
+            shapeManager.CreateDestination(currentNode, destName);
+            destNameText = null;
+            currentNode = null;
+        }
     }
 
     public void OnNewPlaceClick() {
@@ -226,15 +235,12 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 3);
     }
 
-    public void CreateDestination() {
-        dropNode = false;
-        if (destNameText.text != null) destName = destNameText.text;
-        shapeManager.AddDestinationShape(destName);
-    }
-
     public void OnSaveMapClick() {
-        if (mapNameText.text != null) mapName = mapNameText.text;
-        DeleteMaps();
+        if (mapNameText.text != null) {
+            mapName = mapNameText.text;
+            DeleteMaps();
+            mapNameText = null;
+        }
     }
 
     void DeleteMaps() {

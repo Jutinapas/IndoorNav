@@ -39,6 +39,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     private SphereCollider mSphereColliderDummy;
     private CapsuleCollider mCapColliderDummy;
 
+    private RaycastHit hit;
+    private Ray ray;
+
     // Use this for initialization
     void Start() {
         shapeManager = GetComponent<CustomShapeManager>();
@@ -143,8 +146,20 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 Vector3 pos = player.position;
                 Debug.Log(player.position);
                 pos.y = -.5f;
-                shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 0);
+                shapeManager.CreateNode(pos);
             }
+
+            if (!dropNode) {
+                if (Input.touchCount == 1 && Input.GetTouch (0).phase == TouchPhase.Began) {
+                    Ray ray = Camera.main.ScreenPointToRay( Input.GetTouch(0).position );
+                    RaycastHit hit;
+
+                    if (Physics.Raycast(ray, out hit) && hit.transform.gameObject.tag == "") {
+                        //Something
+                    }
+                }
+            }
+
         }
     }
 
@@ -180,13 +195,25 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     }
 
     public void OnToPathClick() {
+        dropNode = true;
         statusText.text = "เริ่มสร้างเส้นทาง";
         Debug.Log("เริ่มสร้างเส้นทาง");
-        dropNode = true;
+    }
+
+    public void OnToMapClick() {
+        dropNode = false;
+        statusText.text = "หยุดสร้างเส้นทาง";
+        Debug.Log("หยุดสร้างเส้นทาง");
+    }
+
+    public void OnUndoClick() {
+        shapeManager.UndoNode();
+        statusText.text = "ย้อนการสร้างเส้นทาง";
+        Debug.Log("ย้อนการสร้างเส้นทาง");
     }
 
     public void OnToDestClick() {
-
+        
     }
 
     public void OnSaveDestClick() {

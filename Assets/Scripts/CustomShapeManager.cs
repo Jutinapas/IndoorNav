@@ -27,7 +27,12 @@ public class CustomShapeManager : MonoBehaviour {
 	public List<GameObject> placeObjList = new List<GameObject>();
 	[HideInInspector]
     public List<GameObject> pathObjList = new List<GameObject>();
+
+	[HideInInspector]
 	public List<GameObject> nodeObjList = new List<GameObject>();
+	[HideInInspector]
+	public List<GameObject> edgeObjList = new List<GameObject>();
+
 
 	private bool shapesLoaded = false;
 
@@ -35,7 +40,8 @@ public class CustomShapeManager : MonoBehaviour {
 	private int TYPE_EDGE = 4;
 	private float MAX_DISTANCE = 1.1f;
 
-	public void Createshape(Vector3 position) {
+	public void CreateNode(Vector3 position) {
+
 		ShapeInfo shapeInfo = new ShapeInfo();
         shapeInfo.px = position.x;
         shapeInfo.py = position.y;
@@ -46,28 +52,26 @@ public class CustomShapeManager : MonoBehaviour {
         shapeInfo.qw = 0;
 		shapeInfo.shapeType = TYPE_NODE.GetHashCode();
 
-		GameObject shape = shapeFromInfo(shapeInfo);
+		GameObject shape = NodeFromInfo(shapeInfo);
+		nodeObjList.Add(shape);
 		
 		Node node = shape.GetComponent<Node>();
 		node.FindNeighbors(MAX_DISTANCE);
 		List<Node> neighbors = node.neighbors;
-		List<GameObject> edges = new List<GameObject>();
 
 		if (neighbors.Count > 0) {
 			foreach (Node neighbor in neighbors) {
 				GameObject edge = Instantiate(ShapePrefabs[TYPE_EDGE]);
-				LineRenderer lineRenderer = edge.GetComponent<LineRenderer>();
-				lineRenderer.SetPosition(0, position);
-				lineRenderer.SetPosition(1, neighbor.pos);
-				edges.Add(edge);
+				edge.GetComponent<LineRenderer>().SetPosition(0, position);
+				edge.GetComponent<LineRenderer>().SetPosition(1, neighbor.pos);
+				edgeObjList.Add(edge);
 			}
 
 		}
 
-
 	}
 
-	public GameObject shapeFromInfo(ShapeInfo info) {
+	public GameObject NodeFromInfo(ShapeInfo info) {
 		GameObject shape;
 		Vector3 position = new Vector3 (info.px, info.py, info.pz);
 
@@ -86,6 +90,26 @@ public class CustomShapeManager : MonoBehaviour {
 		shape.transform.localScale = new Vector3(.3f, .3f, .3f);
 
 		return shape;
+	}
+
+	public void UndoNode() {
+		if (nodeObjList.Count > 0) {
+			GameObject lastNode = nodeObjList[nodeObjList.Count - 1];
+			Destroy(nodeObjList[nodeObjList.Count - 1]);
+			nodeObjList.RemoveAt(nodeObjList.Count - 1);
+
+			
+			int numEdges = lastNode.GetComponent<Node>().neighbors.Count;
+
+			if (numEdges > 0) {
+				for (int i = edgeObjList.Count - 1; i >= edgeObjList.Count - numEdges; i--) {
+					GameObject edge = edgeObjList[i];
+					edgeObjList.RemoveAt(i);
+					Destroy(edge);
+				}
+			}
+			
+		}
 	}
 
     public void AddShape(Vector3 shapePosition, Quaternion shapeRotation, int shapeType)

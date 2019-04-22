@@ -45,7 +45,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     public GameObject mapping;
     public GameObject destNaming;
 
-    private GameObject currentNode;
+    private GameObject selectedNode;
+    public Material[] materials;
+
+    private const int WAYPOINT_MATERIAL = 0;
+    private const int DIAMOND_MATERIAL = 1;
 
     // Use this for initialization
     void Start() {
@@ -154,16 +158,21 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 shapeManager.CreateNode(pos);
             }
 
-            if (!dropNode) {
+            if (!dropNode && selectedNode == null) {
                 if (Input.touchCount == 1 && Input.GetTouch (0).phase == TouchPhase.Began) {
                     Ray ray = Camera.main.ScreenPointToRay( Input.GetTouch(0).position );
                     RaycastHit hit;
 
                     if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Waypoint") {
-                        //Something
+
                         mapping.SetActive(false);
                         destNaming.SetActive(true);
-                        currentNode = hit.transform.gameObject;
+                        selectedNode = hit.transform.gameObject;
+
+                        Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
+                        foreach (Renderer renderer in renderers)
+                            renderer.sharedMaterial = materials[DIAMOND_MATERIAL];
+
                     }
                 }
             }
@@ -221,11 +230,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     }
 
     public void OnSaveDestClick() {
-        if (destNameText.text != null && currentNode != null) {
+        if (destNameText.text != null && selectedNode != null) {
             destName = destNameText.text;
-            shapeManager.CreateDestination(currentNode, destName);
+            shapeManager.CreateDestination(selectedNode.GetComponent<Node>().id, destName);
             destNameText = null;
-            currentNode = null;
+            selectedNode = null;
         }
     }
 
@@ -299,11 +308,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                     statusText.text = "Saved Map Name: " + metadata.name;
                     Debug.Log("Saved Map Name: " + metadata.name);
 
-                    JObject placeList = GetComponent<CustomShapeManager>().Places2JSON();
-                    JObject pathList = GetComponent<CustomShapeManager>().Pathways2JSON();
-                    placeList.Merge(pathList, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union});
+                    // JObject placeList = GetComponent<CustomShapeManager>().Places2JSON();
+                    // JObject pathList = GetComponent<CustomShapeManager>().Pathways2JSON();
+                    // placeList.Merge(pathList, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Union});
 
-                    metadata.userdata = placeList;
+                    // metadata.userdata = placeList;
 
                     if (useLocation) {
                         metadata.location = new LibPlacenote.MapLocation();

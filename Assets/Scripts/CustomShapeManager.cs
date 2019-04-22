@@ -14,31 +14,28 @@ public class CustomShapeManager : MonoBehaviour {
 	public List<GameObject> ShapePrefabs = new List<GameObject> ();
 
 	[HideInInspector]
-	public List<Place> places = new List<Place>();
+	public List<GameObject> waypointObjList = new List<GameObject>();
 	[HideInInspector]
-	public List<Pathway> pathways = new List<Pathway>();
+	public List<ShapeInfo> waypointInfoList = new List<ShapeInfo>();
+	[HideInInspector]
+	public List<Waypoint> waypointList = new List<Waypoint>();
 
 	[HideInInspector]
-	public List<ShapeInfo> placeInfoList = new List<ShapeInfo>();
+	public List<GameObject> destinationObjList = new List<GameObject>();
 	[HideInInspector]
-    public List<ShapeInfo> pathInfoList = new List<ShapeInfo>();
+	public List<ShapeInfo> destinationInfoList = new List<ShapeInfo>();
+	[HideInInspector]
+	public List<Destination> destinationList = new List<Destination>();
 
-	[HideInInspector]
-	public List<GameObject> placeObjList = new List<GameObject>();
-	[HideInInspector]
-    public List<GameObject> pathObjList = new List<GameObject>();
-
-	[HideInInspector]
-	public List<GameObject> nodeObjList = new List<GameObject>();
 	[HideInInspector]
 	public List<GameObject> edgeObjList = new List<GameObject>();
-
 
 	private bool shapesLoaded = false;
 
 	private int TYPE_NODE = 0;
 	private int TYPE_EDGE = 4;
 	private float MAX_DISTANCE = 1.1f;
+	private int id = 0;
 
 	public void CreateNode(Vector3 position) {
 
@@ -53,7 +50,7 @@ public class CustomShapeManager : MonoBehaviour {
 		shapeInfo.shapeType = TYPE_NODE.GetHashCode();
 
 		GameObject shape = NodeFromInfo(shapeInfo);
-		nodeObjList.Add(shape);
+		waypointObjList.Add(shape);
 		
 		Node node = shape.GetComponent<Node>();
 		node.FindNeighbors(MAX_DISTANCE);
@@ -82,7 +79,10 @@ public class CustomShapeManager : MonoBehaviour {
 		}
 		if (shape.GetComponent<Node> () != null) {
 			shape.GetComponent<Node> ().pos = position;
+			shape.GetComponent<Node> ().id = id;
+			id++;
             Debug.Log(position);
+			Debug.Log(id);
 		}
 		shape.tag = "Waypoint";
 		shape.transform.position = position;
@@ -93,10 +93,10 @@ public class CustomShapeManager : MonoBehaviour {
 	}
 
 	public void UndoNode() {
-		if (nodeObjList.Count > 0) {
-			GameObject lastNode = nodeObjList[nodeObjList.Count - 1];
-			Destroy(nodeObjList[nodeObjList.Count - 1]);
-			nodeObjList.RemoveAt(nodeObjList.Count - 1);
+		if (waypointObjList.Count > 0) {
+			GameObject lastNode = waypointObjList[waypointObjList.Count - 1];
+			Destroy(waypointObjList[waypointObjList.Count - 1]);
+			waypointObjList.RemoveAt(waypointObjList.Count - 1);
 
 			
 			int numEdges = lastNode.GetComponent<Node>().neighbors.Count;
@@ -112,21 +112,21 @@ public class CustomShapeManager : MonoBehaviour {
 		}
 	}
 
-	public void CreateDestination (GameObject node, string destName) {
-		//change last waypoint to diamond
-		ShapeInfo lastInfo = pathInfoList [pathInfoList.Count - 1];
-		lastInfo.shapeType = 1.GetHashCode ();
-		GameObject shape = ShapeFromInfo(lastInfo);
-		shape.GetComponent<DiamondBehavior> ().Activate (true);
-		//destroy last shape
-		Destroy (pathObjList [pathObjList.Count - 1]);
-		//add new shape
-		pathObjList.Add (shape);
+	public void CreateDestination (int id, string destName) {
 		
-		Pathway pathway = new Pathway();
-		pathway.name = destName;
-		pathway.shapes = pathInfoList;
-		pathways.Add(pathway);
+		// ShapeInfo lastInfo = pathInfoList [pathInfoList.Count - 1];
+		// lastInfo.shapeType = 1.GetHashCode ();
+		// GameObject shape = ShapeFromInfo(lastInfo);
+		// shape.GetComponent<DiamondBehavior> ().Activate (true);
+		// //destroy last shape
+		// Destroy (pathObjList [pathObjList.Count - 1]);
+		// //add new shape
+		// pathObjList.Add (shape);
+		
+		// Pathway pathway = new Pathway();
+		// pathway.name = destName;
+		// pathway.shapes = pathInfoList;
+		// pathways.Add(pathway);
 
 		//ClearPaths();
 	}
@@ -145,36 +145,36 @@ public class CustomShapeManager : MonoBehaviour {
 
 		GameObject shape = ShapeFromInfo(shapeInfo);
 
-		if (shapeType == 0 || shapeType == 1) {
-			pathInfoList.Add(shapeInfo);
-			pathObjList.Add(shape);
-		} else if (shapeType == 3) {
-			placeInfoList.Add(shapeInfo);
-			placeObjList.Add(shape);
+		// if (shapeType == 0 || shapeType == 1) {
+		// 	pathInfoList.Add(shapeInfo);
+		// 	pathObjList.Add(shape);
+		// } else if (shapeType == 3) {
+		// 	placeInfoList.Add(shapeInfo);
+		// 	placeObjList.Add(shape);
 
-			Place place = new Place();
-			place.name = "Default Place";
-			place.shape = shapeInfo;
-			places.Add(place);
-		}
+		// 	Place place = new Place();
+		// 	place.name = "Default Place";
+		// 	place.shape = shapeInfo;
+		// 	places.Add(place);
+		// }
 
     }
 
 	public void AddDestinationShape (string destName) {
 		//change last waypoint to diamond
-		ShapeInfo lastInfo = pathInfoList [pathInfoList.Count - 1];
-		lastInfo.shapeType = 1.GetHashCode ();
-		GameObject shape = ShapeFromInfo(lastInfo);
-		shape.GetComponent<DiamondBehavior> ().Activate (true);
-		//destroy last shape
-		Destroy (pathObjList [pathObjList.Count - 1]);
-		//add new shape
-		pathObjList.Add (shape);
+		// ShapeInfo lastInfo = pathInfoList [pathInfoList.Count - 1];
+		// lastInfo.shapeType = 1.GetHashCode ();
+		// GameObject shape = ShapeFromInfo(lastInfo);
+		// shape.GetComponent<DiamondBehavior> ().Activate (true);
+		// //destroy last shape
+		// Destroy (pathObjList [pathObjList.Count - 1]);
+		// //add new shape
+		// pathObjList.Add (shape);
 		
-		Pathway pathway = new Pathway();
-		pathway.name = destName;
-		pathway.shapes = pathInfoList;
-		pathways.Add(pathway);
+		// Pathway pathway = new Pathway();
+		// pathway.name = destName;
+		// pathway.shapes = pathInfoList;
+		// pathways.Add(pathway);
 
 		//ClearPaths();
 	}
@@ -217,87 +217,88 @@ public class CustomShapeManager : MonoBehaviour {
     }
 
 	public void ClearPlaces() {
-		foreach (var obj in placeObjList)
-        {
-            Destroy(obj);
-        }
-        placeObjList.Clear();
-        placeInfoList.Clear();
+		// foreach (var obj in placeObjList)
+        // {
+        //     Destroy(obj);
+        // }
+        // placeObjList.Clear();
+        // placeInfoList.Clear();
 	}
 
 	public void ClearPaths() {
-		foreach (var obj in pathObjList)
-        {
-            Destroy(obj);
-        }
-        pathObjList.Clear();
-        pathInfoList.Clear();
+		// foreach (var obj in pathObjList)
+        // {
+        //     Destroy(obj);
+        // }
+        // pathObjList.Clear();
+        // pathInfoList.Clear();
 	}
 
-	public JObject Places2JSON()
-    {
-        PlaceList placeList = new PlaceList();
-        placeList.places = new Place[places.Count];
-        for (int i = 0; i < places.Count; i++)
-        {
-            placeList.places[i] = places[i];
-        }
+	// public JObject Places2JSON()
+    // {
+    //     // PlaceList placeList = new PlaceList();
+    //     // placeList.places = new Place[places.Count];
+    //     // for (int i = 0; i < places.Count; i++)
+    //     // {
+    //     //     placeList.places[i] = places[i];
+    //     // }
 
-        return JObject.FromObject(placeList);
-    }
+    //     // return JObject.FromObject(placeList);
+    // }
 
-    public JObject Pathways2JSON()
-    {
-        PathwayList pathList = new PathwayList();
-        pathList.pathways = new Pathway[pathways.Count];
-        for (int i = 0; i < pathways.Count; i++)
-        {
-            pathList.pathways[i] = pathways[i];
-        }
+    // public JObject Pathways2JSON()
+    // {
+    //     // PathwayList pathList = new PathwayList();
+    //     // pathList.pathways = new Pathway[pathways.Count];
+    //     // for (int i = 0; i < pathways.Count; i++)
+    //     // {
+    //     //     pathList.pathways[i] = pathways[i];
+    //     // }
 
-        return JObject.FromObject(pathList);
-    }
+    //     // return JObject.FromObject(pathList);
+    // }
 
     public void LoadShapesJSON(JToken mapMetadata)
     {
-		if (!shapesLoaded) {
-			shapesLoaded = true;
-            Debug.Log("LOADING SHAPES>>>");
-			if (mapMetadata is JObject && mapMetadata ["shapeList"] is JObject) {
-				ShapeList shapeList = mapMetadata ["shapeList"].ToObject<ShapeList> ();
-				if (shapeList.shapes == null) {
-					Debug.Log ("no shapes dropped");
-					return;
-				}
+	// 	if (!shapesLoaded) {
+	// 		shapesLoaded = true;
+    //         Debug.Log("LOADING SHAPES>>>");
+	// 		if (mapMetadata is JObject && mapMetadata ["shapeList"] is JObject) {
+	// 			ShapeList shapeList = mapMetadata ["shapeList"].ToObject<ShapeList> ();
+	// 			if (shapeList.shapes == null) {
+	// 				Debug.Log ("no shapes dropped");
+	// 				return;
+	// 			}
 
-				foreach (var shapeInfo in shapeList.shapes) {
-					pathInfoList.Add (shapeInfo);
-					GameObject shape = ShapeFromInfo (shapeInfo);
-					pathObjList.Add (shape);
-				}
+	// 			foreach (var shapeInfo in shapeList.shapes) {
+	// 				pathInfoList.Add (shapeInfo);
+	// 				GameObject shape = ShapeFromInfo (shapeInfo);
+	// 				pathObjList.Add (shape);
+	// 			}
 
-				if (navController != null) {
-					navController.InitializeNavigation ();
-				}
-			}
-		}
+	// 			if (navController != null) {
+	// 				navController.InitializeNavigation ();
+	// 			}
+	// 		}
+	// 	}
     }
+
 }
 
-public class PathwayList {
-    public Pathway[] pathways;
+public class Waypoint {
+	public ShapeInfo info;
 }
 
-public class Pathway {
-	public string name; 
-    public List<ShapeInfo> shapes;
-}
-
-public class PlaceList {
-	public Place[] places;
-}
-
-public class Place {
+public class Destination {
+	public ShapeInfo info;
 	public string name;
-	public ShapeInfo shape;
 }
+
+public class WaypointList {
+    public Waypoint[] waypoints;
+}
+
+public class DestinationList {
+	public Destination[] destinations;
+}
+	

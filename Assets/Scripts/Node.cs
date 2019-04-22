@@ -6,6 +6,7 @@ using System.Linq;
 public class Node : MonoBehaviour {
 
     public Vector3 pos;
+    public int id;
 
     [Header("A*")]
     public List<Node> neighbors = new List<Node>();

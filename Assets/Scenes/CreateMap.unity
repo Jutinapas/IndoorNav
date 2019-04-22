@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.5748171, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -680,6 +680,7 @@ MonoBehaviour:
   placeObjList: []
   pathObjList: []
   nodeObjList: []
+  edgeObjList: []
 --- !u!114 &101716594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -726,8 +727,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   statusText: {fileID: 1478018612}
-  destNameText: {fileID: 0}
-  mapNameText: {fileID: 0}
+  destNameText: {fileID: 1924813865}
+  mapNameText: {fileID: 627785916}
+  mapping: {fileID: 822145072}
+  destNaming: {fileID: 577520296}
+  materials:
+  - {fileID: 2100000, guid: 79a11e4e0262446209f4d0f8c6ccbc2f, type: 2}
+  - {fileID: 2100000, guid: dbc6cac24fff041bd9050cbc45d06b77, type: 2}
 --- !u!1 &164843824
 GameObject:
   m_ObjectHideFlags: 0
@@ -1272,7 +1278,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &739201088
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1429,7 +1435,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &822145073
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3305,7 +3311,7 @@ GameObject:
   - component: {fileID: 1924813866}
   - component: {fileID: 1924813865}
   m_Layer: 5
-  m_Name: MapNameText
+  m_Name: DestNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

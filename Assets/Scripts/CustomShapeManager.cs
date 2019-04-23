@@ -14,7 +14,7 @@ public class CustomShapeManager : MonoBehaviour {
 	public List<GameObject> ShapePrefabs = new List<GameObject> ();
 
 	[HideInInspector]
-	public List<GameObject> waypointObjList = new List<GameObject>();
+	public List<GameObject> shapeObjList = new List<GameObject>();
 	[HideInInspector]
 	public List<ShapeInfo> waypointInfoList = new List<ShapeInfo>();
 	[HideInInspector]
@@ -32,9 +32,9 @@ public class CustomShapeManager : MonoBehaviour {
 
 	private bool shapesLoaded = false;
 
-	private int TYPE_NODE = 0;
-	private int TYPE_EDGE = 4;
-	private float MAX_DISTANCE = 1.1f;
+	private readonly int TYPE_NODE = 0;
+	private readonly int TYPE_EDGE = 4;
+	private readonly float MAX_DISTANCE = 1.1f;
 	private int id = 0;
 
 	public void CreateNode(Vector3 position) {
@@ -48,23 +48,25 @@ public class CustomShapeManager : MonoBehaviour {
         shapeInfo.qz = 0;
         shapeInfo.qw = 0;
 		shapeInfo.shapeType = TYPE_NODE.GetHashCode();
+		waypointInfoList.Add(shapeInfo);
 
 		GameObject shape = NodeFromInfo(shapeInfo);
-		waypointObjList.Add(shape);
-		
-		Node node = shape.GetComponent<Node>();
-		node.FindNeighbors(MAX_DISTANCE);
-		List<Node> neighbors = node.neighbors;
+		shapeObjList.Add(shape);
+		Debug.Log("Node Count: " + shapeObjList.Count);
 
-		if (neighbors.Count > 0) {
-			foreach (Node neighbor in neighbors) {
-				GameObject edge = Instantiate(ShapePrefabs[TYPE_EDGE]);
-				edge.GetComponent<LineRenderer>().SetPosition(0, position);
-				edge.GetComponent<LineRenderer>().SetPosition(1, neighbor.pos);
-				edgeObjList.Add(edge);
-			}
-
-		}
+		Collider[] hitColliders = Physics.OverlapSphere(shape.transform.position, MAX_DISTANCE);
+        int i = 0;
+        while (i < hitColliders.Length) {
+            if (hitColliders[i].CompareTag("Waypoint")) {
+                GameObject edge = Instantiate(ShapePrefabs[TYPE_EDGE]);
+				edge.GetComponent<LineRenderer>().SetPosition(0, shape.transform.position);
+				edge.GetComponent<LineRenderer>().SetPosition(1, hitColliders[i].transform.position);
+				shapeObjList.Add(edge);
+				Debug.Log(position);
+				Debug.Log(hitColliders[i].transform.position);
+            }
+            i++;
+        }
 
 	}
 
@@ -74,16 +76,10 @@ public class CustomShapeManager : MonoBehaviour {
 
 		if (SceneManager.GetActiveScene ().name == "ReadMap" && info.shapeType == 0) {
 			shape = Instantiate (ShapePrefabs [2]);
-		}  else {
+		} else {
 			shape = Instantiate (ShapePrefabs [info.shapeType]);
 		}
-		if (shape.GetComponent<Node> () != null) {
-			shape.GetComponent<Node> ().pos = position;
-			shape.GetComponent<Node> ().id = id;
-			id++;
-            Debug.Log(position);
-			Debug.Log(id);
-		}
+
 		shape.tag = "Waypoint";
 		shape.transform.position = position;
 		shape.transform.rotation = new Quaternion(info.qx, info.qy, info.qz, info.qw);
@@ -93,22 +89,9 @@ public class CustomShapeManager : MonoBehaviour {
 	}
 
 	public void UndoNode() {
-		if (waypointObjList.Count > 0) {
-			GameObject lastNode = waypointObjList[waypointObjList.Count - 1];
-			Destroy(waypointObjList[waypointObjList.Count - 1]);
-			waypointObjList.RemoveAt(waypointObjList.Count - 1);
-
-			
-			int numEdges = lastNode.GetComponent<Node>().neighbors.Count;
-
-			if (numEdges > 0) {
-				for (int i = edgeObjList.Count - 1; i >= edgeObjList.Count - numEdges; i--) {
-					GameObject edge = edgeObjList[i];
-					edgeObjList.RemoveAt(i);
-					Destroy(edge);
-				}
-			}
-			
+		if (shapeObjList.Count > 0) {
+			Destroy(shapeObjList[shapeObjList.Count - 1]);
+			shapeObjList.RemoveAt(shapeObjList.Count - 1);
 		}
 	}
 

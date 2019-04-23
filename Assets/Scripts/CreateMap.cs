@@ -163,15 +163,24 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                     Ray ray = Camera.main.ScreenPointToRay( Input.GetTouch(0).position );
                     RaycastHit hit;
 
+                    Debug.Log("Tapped!");
+                    statusText.text = "ทัช!";
+
                     if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Waypoint") {
 
                         mapping.SetActive(false);
                         destNaming.SetActive(true);
                         selectedNode = hit.transform.gameObject;
 
+                        Debug.Log("Tapped!");
+                        statusText.text = "โดน!";
+
                         Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
-                        foreach (Renderer renderer in renderers)
+                        foreach (Renderer renderer in renderers) {
                             renderer.sharedMaterial = materials[DIAMOND_MATERIAL];
+                            Debug.Log("Tapped!");
+                            statusText.text = "เปลี่ยนสี!";
+                        }
 
                     }
                 }
@@ -351,9 +360,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
         } else if (currStatus == LibPlacenote.MappingStatus.LOST) {
             Debug.Log("Searching for position lock");
         } else if (currStatus == LibPlacenote.MappingStatus.WAITING) {
-            if (GetComponent<CustomShapeManager>().placeObjList.Count != 0) {
-                //GetComponent<CustomShapeManager>().ClearShapes();
-            }
+            // if (GetComponent<CustomShapeManager>().placeObjList.Count != 0) {
+            //     //GetComponent<CustomShapeManager>().ClearShapes();
+            // }
         }
     }
 }

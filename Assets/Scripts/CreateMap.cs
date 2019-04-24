@@ -147,7 +147,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 Collider[] hitColliders = Physics.OverlapSphere(player.position, 1f);
                 int i = 0;
                 while (i < hitColliders.Length) {
-                    if (hitColliders[i].CompareTag("Waypoint")) {
+                    if (hitColliders[i].CompareTag("Node")) {
                         return;
                     }
                     i++;
@@ -155,7 +155,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                 Vector3 pos = player.position;
                 Debug.Log(player.position);
                 pos.y = -.5f;
-                shapeManager.CreateNode(pos);
+                shapeManager.CreateWay(pos);
             }
 
             if (!dropNode && selectedNode == null) {
@@ -166,7 +166,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
                     Debug.Log("Tapped!");
                     statusText.text = "ทัช!";
 
-                    if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Waypoint") {
+                    if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint") {
 
                         mapping.SetActive(false);
                         destNaming.SetActive(true);
@@ -233,7 +233,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     }
 
     public void OnUndoClick() {
-        shapeManager.UndoNode();
+        shapeManager.UndoShape();
         statusText.text = "ย้อนการสร้างเส้นทาง";
         Debug.Log("ย้อนการสร้างเส้นทาง");
     }
@@ -241,16 +241,27 @@ public class CreateMap : MonoBehaviour, PlacenoteListener {
     public void OnSaveDestClick() {
         if (destNameText.text != null && selectedNode != null) {
             destName = destNameText.text;
-            shapeManager.CreateDestination(selectedNode.GetComponent<Node>().id, destName);
+            shapeManager.CreateDest(selectedNode, destName);
             destNameText = null;
             selectedNode = null;
         }
     }
 
+    public void OnCancelDestClick() {
+        Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers) {
+            renderer.sharedMaterial = materials[WAYPOINT_MATERIAL];
+            Debug.Log("Tapped!");
+            statusText.text = "เปลี่ยนสีกลับ!";
+        }
+        destNameText = null;
+        selectedNode = null;
+    }
+
     public void OnNewPlaceClick() {
-        Transform player = Camera.main.transform;
-        Vector3 pos = player.position;
-        shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 3);
+        // Transform player = Camera.main.transform;
+        // Vector3 pos = player.position;
+        // shapeManager.AddShape(pos, Quaternion.Euler(Vector3.zero), 3);
     }
 
     public void OnSaveMapClick() {

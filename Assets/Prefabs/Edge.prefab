@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4770271153264128}
   - component: {fileID: 120699232170732140}
   m_Layer: 0
-  m_Name: Line
+  m_Name: Edge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

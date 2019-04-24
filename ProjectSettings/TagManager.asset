@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Place
   - Waypoint
+  - Edge
+  - Node
   layers:
   - Default
   - TransparentFX

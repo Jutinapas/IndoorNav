@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 65097387241351288}
   m_Layer: 8
   m_Name: Diamond
-  m_TagString: Waypoint
+  m_TagString: Node
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

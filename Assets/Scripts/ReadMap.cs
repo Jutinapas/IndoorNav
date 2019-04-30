@@ -9,9 +9,15 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
-public class ReadMap : MonoBehaviour, PlacenoteListener {
+public class ReadMap : MonoBehaviour, PlacenoteListener
+{
 
     private const string MAP_NAME = "GenericMap";
+
+    [SerializeField] GameObject mListElement;
+    [SerializeField] RectTransform mListContentParent;
+    [SerializeField] ToggleGroup mToggleGroup;
+    [SerializeField] Text statusText;
 
     private UnityARSessionNativeInterface mSession;
     private bool mFrameUpdated = false;
@@ -26,14 +32,16 @@ public class ReadMap : MonoBehaviour, PlacenoteListener {
     string currMapID = String.Empty;
 
     private LibPlacenote.MapInfo mSelectedMapInfo;
-    private string mSelectedMapId {
-        get {
+    private string mSelectedMapId
+    {
+        get
+        {
             return mSelectedMapInfo != null ? mSelectedMapInfo.placeId : null;
         }
     }
 
-    // Use this for initialization
-    void Start() {
+    void Start()
+    {
         Input.location.Start();
 
         mSession = UnityARSessionNativeInterface.GetARSessionNativeInterface();
@@ -41,18 +49,41 @@ public class ReadMap : MonoBehaviour, PlacenoteListener {
         StartARKit();
         FeaturesVisualizer.EnablePointcloud();
         LibPlacenote.Instance.RegisterListener(this);
+        GetListMaps();
     }
 
-    void OnDisable() {
+    private void StartARKit()
+    {
+        Debug.Log("Initializing ARKit");
+        Application.targetFrameRate = 60;
+        ConfigureSession(false);
+    }
+
+    private void ConfigureSession(bool clearPlanes)
+    {
+#if !UNITY_EDITOR
+		ARKitWorldTrackingSessionConfiguration config = new ARKitWorldTrackingSessionConfiguration ();
+		config.planeDetection = UnityARPlaneDetection.None;
+		config.alignment = UnityARAlignment.UnityARAlignmentGravity;
+		config.getPointCloudData = true;
+		config.enableLightEstimation = true;
+		mSession.RunWithConfig (config);
+#endif
+    }
+
+    void OnDisable()
+    {
         UnityARSessionNativeInterface.ARFrameUpdatedEvent -= ARFrameUpdated;
     }
 
-    private void ARFrameUpdated(UnityARCamera camera) {
+    private void ARFrameUpdated(UnityARCamera camera)
+    {
         mFrameUpdated = true;
         mARCamera = camera;
     }
 
-    private void InitARFrameBuffer() {
+    private void InitARFrameBuffer()
+    {
         mImage = new UnityARImageFrameData();
 
         int yBufSize = mARCamera.videoParams.yWidth * mARCamera.videoParams.yHeight;
@@ -61,7 +92,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener {
         mImage.y.height = (ulong)mARCamera.videoParams.yHeight;
         mImage.y.stride = (ulong)mARCamera.videoParams.yWidth;
 
-        // This does assume the YUV_NV21 format
         int vuBufSize = mARCamera.videoParams.yWidth * mARCamera.videoParams.yWidth / 2;
         mImage.vu.data = Marshal.AllocHGlobal(vuBufSize);
         mImage.vu.width = (ulong)mARCamera.videoParams.yWidth / 2;
@@ -71,21 +101,68 @@ public class ReadMap : MonoBehaviour, PlacenoteListener {
         mSession.SetCapturePixelData(true, mImage.y.data, mImage.vu.data);
     }
 
-    // Update is called once per frame
-    void Update() {
-        if (mFrameUpdated) {
+    void Update()
+    {
+        if (mFrameUpdated)
+        {
             mFrameUpdated = false;
-            if (mImage == null) {
+            if (mImage == null)
+            {
                 InitARFrameBuffer();
             }
 
-            if (mARCamera.trackingState == ARTrackingState.ARTrackingStateNotAvailable) {
-                // ARKit pose is not yet initialized
+            if (mARCamera.trackingState == ARTrackingState.ARTrackingStateNotAvailable)
+            {
                 return;
-            } else if (!mARKitInit && LibPlacenote.Instance.Initialized()) {
+            }
+            else if (!mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
+            {
                 mARKitInit = true;
-                Debug.Log("ARKit Initialized: LOADING MAP!!!!!");
-                FindMap();
+                Debug.Log("LOADING MAP!!!!!");
+                statusText.text = "LOADING MAP!!!!!";
+
+                LibPlacenote.Instance.LoadMap(mSelectedMapId,
+                    (completed, faulted, percentage) =>
+                    {
+                        if (completed)
+                        {
+                            if (mReportDebug)
+                            {
+                                LibPlacenote.Instance.StartRecordDataset(
+                                    (datasetCompleted, datasetFaulted, datasetPercentage) =>
+                                    {
+                                        if (datasetCompleted)
+                                        {
+                                            Debug.Log("Dataset Upload Complete");
+                                        }
+                                        else if (datasetFaulted)
+                                        {
+                                            Debug.Log("Dataset Upload Faulted");
+                                        }
+                                        else
+                                        {
+                                            Debug.Log("Dataset Upload: " + datasetPercentage.ToString("F2") + "/1.0");
+                                        }
+                                    });
+                                Debug.Log("Started Debug Report");
+                            }
+
+                            LibPlacenote.Instance.StartSession();
+                            Debug.Log("Starting session " + mSelectedMapId);
+                            statusText.text = "Starting session " + mSelectedMapId;
+                        }
+                        else if (faulted)
+                        {
+                            Debug.Log("Failed to load " + mSelectedMapId);
+                            statusText.text = "Failed to load " + mSelectedMapId;
+                        }
+                        else
+                        {
+                            Debug.Log("Map Downloaded: " + (percentage * 100).ToString() + "%");
+                            statusText.text = "Map Downloaded: " + (percentage * 100).ToString() + " %";
+                        }
+                    }
+                );
             }
 
             Matrix4x4 matrix = mSession.GetCameraPose();
@@ -97,85 +174,72 @@ public class ReadMap : MonoBehaviour, PlacenoteListener {
         }
     }
 
-    void FindMap() {
-        //get metadata
-        LibPlacenote.Instance.SearchMaps(MAP_NAME, (LibPlacenote.MapInfo[] obj) => {
-            foreach (LibPlacenote.MapInfo map in obj) {
-                if (map.metadata.name == MAP_NAME) {
-                    mSelectedMapInfo = map;
-                    Debug.Log("FOUND MAP: " + mSelectedMapInfo.placeId);
-                    LoadMap();
-                    return;
+    public void GetListMaps()
+    {
+        if (!LibPlacenote.Instance.Initialized())
+        {
+            Debug.Log("SDK not yet initialized");
+            statusText.text = "SDK not yet initialized";
+            return;
+        }
+
+        foreach (Transform t in mListContentParent.transform)
+        {
+            Destroy(t.gameObject);
+        }
+
+        LibPlacenote.Instance.ListMaps((mapList) =>
+        {
+            foreach (LibPlacenote.MapInfo mapInfoItem in mapList)
+            {
+                if (mapInfoItem.metadata.userdata != null)
+                {
+                    Debug.Log(mapInfoItem.metadata.userdata.ToString(Formatting.None));
                 }
+                AddMapToList(mapInfoItem);
             }
+        });
+
+        Debug.Log("Select Map in List");
+        statusText.text = "Select Map in List";
+    }
+
+    void AddMapToList(LibPlacenote.MapInfo mapInfo)
+    {
+        GameObject newElement = Instantiate(mListElement) as GameObject;
+        MapInfoElement listElement = newElement.GetComponent<MapInfoElement>();
+        listElement.Initialize(mapInfo, mToggleGroup, mListContentParent, (value) =>
+        {
+            OnMapSelected(mapInfo);
         });
     }
 
-    void LoadMap() {
-        ConfigureSession(false);
-
-        LibPlacenote.Instance.LoadMap(mSelectedMapInfo.placeId,
-            (completed, faulted, percentage) => {
-                if (completed) {
-
-                    if (mReportDebug) {
-                        LibPlacenote.Instance.StartRecordDataset(
-                            (datasetCompleted, datasetFaulted, datasetPercentage) => {
-
-                                if (datasetCompleted) {
-                                    Debug.Log("Dataset Upload Complete");
-                                } else if (datasetFaulted) {
-                                    Debug.Log("Dataset Upload Faulted");
-                                } else {
-                                    Debug.Log("Dataset Upload: " + datasetPercentage.ToString("F2") + "/1.0");
-                                }
-                            });
-                        Debug.Log("Started Debug Report");
-                    }
-
-                    Debug.Log("Loaded ID: " + mSelectedMapInfo.placeId + "...Starting session");
-
-                    LibPlacenote.Instance.StartSession(true);
-
-                } else if (faulted) {
-                    Debug.Log("Failed to load ID: " + mSelectedMapInfo.placeId);
-                } else {
-                    Debug.Log("Map Download: " + percentage.ToString("F2") + "/1.0");
-                }
-            }
-        );
-    }
-
-    private void StartARKit() {
-        Debug.Log("Initializing ARKit");
-        Application.targetFrameRate = 60;
-        ConfigureSession(false);
-    }
-
-    private void ConfigureSession(bool clearPlanes) {
-#if !UNITY_EDITOR
-		ARKitWorldTrackingSessionConfiguration config = new ARKitWorldTrackingSessionConfiguration ();
-		config.planeDetection = UnityARPlaneDetection.None;
-		config.alignment = UnityARAlignment.UnityARAlignmentGravity;
-		config.getPointCloudData = true;
-		config.enableLightEstimation = true;
-		mSession.RunWithConfig (config);
-#endif
+    void OnMapSelected(LibPlacenote.MapInfo mapInfo)
+    {
+        mSelectedMapInfo = mapInfo;
     }
 
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
 
-    public void OnStatusChange(LibPlacenote.MappingStatus prevStatus, LibPlacenote.MappingStatus currStatus) {
+    public void OnStatusChange(LibPlacenote.MappingStatus prevStatus, LibPlacenote.MappingStatus currStatus)
+    {
         Debug.Log("prevStatus: " + prevStatus.ToString() + " currStatus: " + currStatus.ToString());
-        if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.LOST) {
+        if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.LOST)
+        {
             Debug.Log("Localized: " + mSelectedMapInfo.metadata.name);
             GetComponent<CustomShapeManager>().LoadShapesJSON(mSelectedMapInfo.metadata.userdata);
             FeaturesVisualizer.DisablePointcloud();
-        } else if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.WAITING) {
+        }
+        else if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.WAITING)
+        {
             Debug.Log("Mapping");
-        } else if (currStatus == LibPlacenote.MappingStatus.LOST) {
+        }
+        else if (currStatus == LibPlacenote.MappingStatus.LOST)
+        {
             Debug.Log("Searching for position lock");
-        } else if (currStatus == LibPlacenote.MappingStatus.WAITING) {
+        }
+        else if (currStatus == LibPlacenote.MappingStatus.WAITING)
+        {
             // if (GetComponent<CustomShapeManager>().placeObjList.Count != 0) {
             //     //GetComponent<CustomShapeManager>().ClearShapes();
             // }

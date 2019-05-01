@@ -447,4 +447,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
             }
         }
     }
+
+    void OnApplicationQuit()
+	{
+		LibPlacenote.Instance.Shutdown();
+	}
 }

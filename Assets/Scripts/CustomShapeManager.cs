@@ -7,6 +7,37 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 
+public class ShapeInfo {
+    public float px;
+    public float py;
+    public float pz;
+    public float qx;
+    public float qy;
+    public float qz;
+    public float qw;
+    public int type;
+}
+
+public class Shape
+{
+    public ShapeInfo info;
+}
+
+public class Waypoint : Shape
+{
+    public int id;
+}
+
+public class Destination : Shape
+{
+    public int id;
+    public string name;
+}
+
+public class ShapeList {
+    public Shape[] shapes;
+}
+
 public class CustomShapeManager : MonoBehaviour
 {
     public NavController navController;
@@ -44,7 +75,7 @@ public class CustomShapeManager : MonoBehaviour
         waypoint.info.qy = 0;
         waypoint.info.qz = 0;
         waypoint.info.qw = 0;
-        waypoint.info.shapeType = TYPE_WAY.GetHashCode();
+        waypoint.info.type = TYPE_WAY.GetHashCode();
         shapeList.Add(waypoint);
         id++;
 
@@ -88,7 +119,7 @@ public class CustomShapeManager : MonoBehaviour
             dest.info.qy = 0;
             dest.info.qz = 0;
             dest.info.qw = 0;
-            dest.info.shapeType = TYPE_DEST.GetHashCode();
+            dest.info.type = TYPE_DEST.GetHashCode();
 
             Destroy(selectedNode);
             shapeObjList.RemoveAt(index);
@@ -108,13 +139,13 @@ public class CustomShapeManager : MonoBehaviour
         GameObject shape;
         Vector3 position = new Vector3(info.px, info.py, info.pz);
 
-        if (SceneManager.GetActiveScene().name == "ReadMap" && info.shapeType == TYPE_WAY)
+        if (SceneManager.GetActiveScene().name == "ReadMap" && info.type == TYPE_WAY)
         {
             shape = Instantiate(ShapePrefabs[TYPE_ARROW]);
         }
         else
         {
-            shape = Instantiate(ShapePrefabs[info.shapeType]);
+            shape = Instantiate(ShapePrefabs[info.type]);
         }
 
         shape.tag = "Node";
@@ -147,13 +178,20 @@ public class CustomShapeManager : MonoBehaviour
 
     public JObject Shapes2JSON()
     {
-		return JObject.FromObject(shapeList);
+        ShapeList shapeList = new ShapeList();
+        shapeList.shapes = new Shape[this.shapeList.Count];
+        for (int i = 0; i < this.shapeList.Count; i++)
+        {
+            shapeList.shapes[i] = this.shapeList[i];
+        }
+
+        return JObject.FromObject(shapeList);
     }
 
-    public void ClearShapes() 
+    public void ClearShapes()
     {
         Debug.Log("Clearing Shapes");
-        foreach (var obj in shapeObjList)
+        foreach (GameObject obj in shapeObjList)
         {
             Destroy(obj);
         }
@@ -163,43 +201,32 @@ public class CustomShapeManager : MonoBehaviour
 
     public void LoadShapesJSON(JToken mapMetadata)
     {
-        // 	if (!shapesLoaded) {
-        // 		shapesLoaded = true;
-        //         Debug.Log("LOADING SHAPES>>>");
-        // 		if (mapMetadata is JObject && mapMetadata ["shapeList"] is JObject) {
-        // 			ShapeList shapeList = mapMetadata ["shapeList"].ToObject<ShapeList> ();
-        // 			if (shapeList.shapes == null) {
-        // 				Debug.Log ("no shapes dropped");
-        // 				return;
-        // 			}
+        if (!shapesLoaded)
+        {
+            shapesLoaded = true;
+            Debug.Log("LOADING SHAPES...");
+            if (mapMetadata is JObject && mapMetadata["shapeList"] is JObject)
+            {
+                ShapeList shapeList = mapMetadata["shapeList"].ToObject<ShapeList>();
+                if (shapeList.shapes == null)
+                {
+                    Debug.Log("No shapes dropped");
+                    return;
+                }
 
-        // 			foreach (var shapeInfo in shapeList.shapes) {
-        // 				pathInfoList.Add (shapeInfo);
-        // 				GameObject shape = ShapeFromInfo (shapeInfo);
-        // 				pathObjList.Add (shape);
-        // 			}
+                foreach (Shape shape in shapeList.shapes)
+                {
+                    this.shapeList.Add(shape);
+                    GameObject shapeObj = ShapeFromInfo(shape.info);
+                    this.shapeObjList.Add(shapeObj);
+                }
 
-        // 			if (navController != null) {
-        // 				navController.InitializeNavigation ();
-        // 			}
-        // 		}
-        // 	}
+                if (navController != null)
+                {
+                    navController.InitializeNavigation();
+                }
+            }
+        }
     }
 
-}
-
-public class Shape
-{
-    public ShapeInfo info;
-}
-
-public class Waypoint : Shape
-{
-    public int id;
-}
-
-public class Destination : Shape
-{
-    public int id;
-    public string name;
 }

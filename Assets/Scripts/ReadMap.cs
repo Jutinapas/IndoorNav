@@ -19,6 +19,9 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     [SerializeField] ToggleGroup mToggleGroup;
     [SerializeField] Text statusText;
 
+    private bool mapListUpdated = false;
+    private bool mapLoaded = false;
+
     private UnityARSessionNativeInterface mSession;
     private bool mFrameUpdated = false;
     private UnityARImageFrameData mImage = null;
@@ -49,7 +52,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         StartARKit();
         FeaturesVisualizer.EnablePointcloud();
         LibPlacenote.Instance.RegisterListener(this);
-        GetListMaps();
     }
 
     private void StartARKit()
@@ -115,7 +117,17 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             {
                 return;
             }
-            else if (!mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
+            else if (!LibPlacenote.Instance.Initialized())
+            {
+                Debug.Log("SDK not yet initialized");
+                statusText.text = "SDK not yet initialized";
+                return;
+            }
+            else if (!mapListUpdated && LibPlacenote.Instance.Initialized()) 
+            {
+                GetListMaps();
+            }
+            else if (!mapLoaded && !mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
             {
                 mARKitInit = true;
                 Debug.Log("LOADING MAP!!!!!");
@@ -147,6 +159,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
                                 Debug.Log("Started Debug Report");
                             }
 
+                            mapLoaded = true;
                             LibPlacenote.Instance.StartSession();
                             Debug.Log("Starting session " + mSelectedMapId);
                             statusText.text = "Starting session " + mSelectedMapId;
@@ -158,11 +171,13 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
                         }
                         else
                         {
-                            Debug.Log("Map Downloaded: " + (percentage * 100).ToString() + "%");
-                            statusText.text = "Map Downloaded: " + (percentage * 100).ToString() + " %";
+                            Debug.Log("Map Downloaded: " + Convert.ToInt32(percentage * 100).ToString() + "%");
+                            statusText.text = "Map Downloaded: " + Convert.ToInt32(percentage * 100).ToString() + " %";
                         }
                     }
                 );
+
+                mSelectedMapInfo = null;
             }
 
             Matrix4x4 matrix = mSession.GetCameraPose();
@@ -176,13 +191,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     public void GetListMaps()
     {
-        if (!LibPlacenote.Instance.Initialized())
-        {
-            Debug.Log("SDK not yet initialized");
-            statusText.text = "SDK not yet initialized";
-            return;
-        }
-
         foreach (Transform t in mListContentParent.transform)
         {
             Destroy(t.gameObject);
@@ -200,6 +208,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             }
         });
 
+        mapListUpdated = true;
         Debug.Log("Select Map in List");
         statusText.text = "Select Map in List";
     }
@@ -216,6 +225,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     void OnMapSelected(LibPlacenote.MapInfo mapInfo)
     {
+
         mSelectedMapInfo = mapInfo;
     }
 
@@ -245,4 +255,9 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             // }
         }
     }
+
+    void OnApplicationQuit()
+	{
+		LibPlacenote.Instance.Shutdown();
+	}
 }

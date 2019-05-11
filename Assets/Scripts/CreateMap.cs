@@ -25,6 +25,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     private bool dropNode = false;
     private bool overlapNode = false;
     private bool shouldSaveMap = true;
+    private bool shouldHit = true;
 
     private UnityARSessionNativeInterface mSession;
     private bool mFrameUpdated = false;
@@ -167,13 +168,13 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     }
                     i++;
                 }
-                Vector3 pos = player.position;
-                Debug.Log(player.position);
-                pos.y = -.5f;
-                shapeManager.CreateWay(pos);
+                Vector3 position = player.position;
+                position.y = -.5f;
+                Debug.Log(position);
+                shapeManager.CreateWay(position);
             }
 
-            if (!dropNode && selectedNode == null)
+            if (shouldHit && !dropNode && selectedNode == null)
             {
                 if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
                 {
@@ -181,11 +182,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     RaycastHit hit;
 
                     Debug.Log("Tapped!");
-                    statusText.text = "ทัช!";
+                    statusText.text = "สัมผัส!";
 
-                    if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint")
+                    if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint(Clone)")
                     {
-
+                        shouldHit = false;
                         mapping.SetActive(false);
                         destNaming.SetActive(true);
                         selectedNode = hit.transform.gameObject;
@@ -268,10 +269,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     public void OnSaveDestClick()
     {
-        if (destNameText.text != null && selectedNode != null)
+        if (destNameText.text != "" && selectedNode != null)
         {
             destName = destNameText.text;
             shapeManager.CreateDest(selectedNode, destName);
+            backFromDestNaming();
         }
     }
 
@@ -292,15 +294,16 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     private void backFromDestNaming()
     {
-        destNameText = null;
+        destNameText.text = "";
         selectedNode = null;
         destNaming.SetActive(false);
         mapping.SetActive(true);
+        shouldHit = true;
     }
 
     public void OnSaveMapClick()
     {
-        if (mapNameText.text != null)
+        if (mapNameText.text != "")
         {
 
             mapName = mapNameText.text;
@@ -342,16 +345,12 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     SaveCurrentMap();
             });
 
-            mapNameText = null;
-            mapNaming.SetActive(false);
-            saving.SetActive(true);
-
         }
     }
 
     public void OnCancelMapClick()
     {
-        mapNameText = null;
+        mapNameText.text = "";
     }
 
     void SaveCurrentMap()
@@ -367,6 +366,10 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                 ToastManager.ShowToast("SDK ยังไม่ถูกติดตั้ง", 2f);
                 return;
             }
+
+            mapNameText.text = "";
+            mapNaming.SetActive(false);
+            saving.SetActive(true);
 
             bool useLocation = Input.location.status == LocationServiceStatus.Running;
             LocationInfo locationInfo = Input.location.lastData;
@@ -413,8 +416,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     }
                     else
                     {
-                        Debug.Log("กำลังอัพโหลด: " + mCurrMapDetails.name + (percentage * 100).ToString("F2"));
-                        statusText.text = "กำลังอัพโหลด: " + mCurrMapDetails.name + (percentage * 100).ToString("F2");
+                        Debug.Log("กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int) (percentage * 100)).ToString() + "%");
+                        statusText.text = "กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int) (percentage * 100)).ToString() + "%";
                     }
                 }
             );

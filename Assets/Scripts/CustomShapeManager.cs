@@ -42,7 +42,7 @@ public class CustomShapeManager : MonoBehaviour
 {
     public NavController navController;
 
-    public List<GameObject> ShapePrefabs = new List<GameObject>();
+    public List<GameObject> shapePrefabs = new List<GameObject>();
 
     [HideInInspector]
     public List<GameObject> shapeObjList = new List<GameObject>();
@@ -50,7 +50,6 @@ public class CustomShapeManager : MonoBehaviour
     public List<GameObject> edgeObjList = new List<GameObject>();
     [HideInInspector]
     public List<int> numEdgeList = new List<int>();
-
     [HideInInspector]
     public List<Shape> shapeList = new List<Shape>();
 
@@ -65,35 +64,39 @@ public class CustomShapeManager : MonoBehaviour
 
     public void CreateWay(Vector3 position)
     {
-
+        ShapeInfo info = new ShapeInfo();
+        info.px = position.x;
+        info.py = position.y;
+        info.pz = position.z;
+        info.qx = 0;
+        info.qy = 0;
+        info.qz = 0;
+        info.qw = 0;
+        info.type = TYPE_WAY.GetHashCode();
         Waypoint waypoint = new Waypoint();
         waypoint.id = id;
-        waypoint.info.px = position.x;
-        waypoint.info.py = position.y;
-        waypoint.info.pz = position.z;
-        waypoint.info.qx = 0;
-        waypoint.info.qy = 0;
-        waypoint.info.qz = 0;
-        waypoint.info.qw = 0;
-        waypoint.info.type = TYPE_WAY.GetHashCode();
+        waypoint.info = info;
         shapeList.Add(waypoint);
         id++;
 
+        Debug.Log("ShapeFromInfo");
         GameObject gameObject = ShapeFromInfo(waypoint.info);
         shapeObjList.Add(gameObject);
+        Debug.Log("Add Shape");
 
-        Collider[] hitColliders = Physics.OverlapSphere(gameObject.transform.position, MAX_DISTANCE);
+        Collider[] hitColliders = Physics.OverlapSphere(position, MAX_DISTANCE);
         numEdgeList.Add(hitColliders.Length);
+        Debug.Log(hitColliders.Length);
         int i = 0;
         while (i < hitColliders.Length)
         {
             if (hitColliders[i].CompareTag("Node"))
             {
-                GameObject edge = Instantiate(ShapePrefabs[TYPE_EDGE]);
+                GameObject edge = Instantiate(shapePrefabs[TYPE_EDGE]);
                 edge.GetComponent<LineRenderer>().SetPosition(0, gameObject.transform.position);
                 edge.GetComponent<LineRenderer>().SetPosition(1, hitColliders[i].transform.position);
                 edgeObjList.Add(edge);
-                Debug.Log(position);
+                Debug.Log(gameObject.transform.position);
                 Debug.Log(hitColliders[i].transform.position);
             }
             i++;
@@ -107,28 +110,29 @@ public class CustomShapeManager : MonoBehaviour
         int index = shapeObjList.FindIndex(shape => shape.transform.position == selectedNode.transform.position);
         if (index >= 0)
         {
-
-            Waypoint shape = (Waypoint)shapeList[index];
+            Waypoint shape = (Waypoint) shapeList[index];
+            ShapeInfo info = new ShapeInfo();
+            info.px = shape.info.px;
+            info.py = shape.info.py;
+            info.pz = shape.info.pz;
+            info.qx = 0;
+            info.qy = 0;
+            info.qz = 0;
+            info.qw = 0;
+            info.type = TYPE_DEST.GetHashCode();
             Destination dest = new Destination();
             dest.id = shape.id;
             dest.name = destName;
-            dest.info.px = shape.info.px;
-            dest.info.py = shape.info.py;
-            dest.info.pz = shape.info.pz;
-            dest.info.qx = 0;
-            dest.info.qy = 0;
-            dest.info.qz = 0;
-            dest.info.qw = 0;
-            dest.info.type = TYPE_DEST.GetHashCode();
+            dest.info = info;
 
             Destroy(selectedNode);
             shapeObjList.RemoveAt(index);
             GameObject gameObject = ShapeFromInfo(dest.info);
-            gameObject.GetComponent<DiamondBehavior>().Activate(true);
             shapeObjList.Insert(index, gameObject);
 
             shapeList.RemoveAt(index);
             shapeList.Insert(index, dest);
+            Debug.Log(((Destination) shapeList[index]).name);
 
         }
 
@@ -141,11 +145,11 @@ public class CustomShapeManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name == "ReadMap" && info.type == TYPE_WAY)
         {
-            shape = Instantiate(ShapePrefabs[TYPE_ARROW]);
+            shape = Instantiate(shapePrefabs[TYPE_ARROW]);
         }
         else
         {
-            shape = Instantiate(ShapePrefabs[info.type]);
+            shape = Instantiate(shapePrefabs[info.type]);
         }
 
         shape.tag = "Node";
@@ -168,8 +172,8 @@ public class CustomShapeManager : MonoBehaviour
 
             for (int i = numEdgeList[lastIndex]; i > 0; i--)
             {
-                Destroy(edgeObjList[edgeObjList.Count]);
-                shapeObjList.RemoveAt(lastIndex);
+                Destroy(edgeObjList[edgeObjList.Count - 1]);
+                edgeObjList.RemoveAt(lastIndex);
             }
 
             numEdgeList.RemoveAt(lastIndex);
@@ -182,7 +186,12 @@ public class CustomShapeManager : MonoBehaviour
         shapeList.shapes = new Shape[this.shapeList.Count];
         for (int i = 0; i < this.shapeList.Count; i++)
         {
-            shapeList.shapes[i] = this.shapeList[i];
+            Debug.Log(this.shapeList[i].info.type);
+            if (this.shapeList[i].info.type == TYPE_WAY.GetHashCode()) {
+                shapeList.shapes[i] = (Waypoint) this.shapeList[i];
+            } else if (this.shapeList[i].info.type == TYPE_DEST.GetHashCode()) {
+                shapeList.shapes[i] = (Destination) this.shapeList[i];
+            }
         }
 
         return JObject.FromObject(shapeList);

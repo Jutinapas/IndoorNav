@@ -246,7 +246,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             Destroy(t.gameObject);
         }
 
-        foreach (Shape shape in GetComponent<CustomShapeManager>().shapeList)
+        foreach (NodeShape shape in GetComponent<CustomShapeManager>().shapeList)
         {
             if (shape.info.type == 1.GetHashCode())
             {
@@ -300,12 +300,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             //     //GetComponent<CustomShapeManager>().ClearShapes();
             // }
         }
-    }
-
-    public void OnApplicationQuit()
-    {
-        LibPlacenote.Instance.Shutdown();
-        GetComponent<CustomShapeManager>().ClearShapes();
     }
 
 }

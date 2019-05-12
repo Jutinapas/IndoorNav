@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 
-public class ShapeInfo
+public class NodeShapeInfo
 {
     public float px;
     public float py;
@@ -19,25 +19,25 @@ public class ShapeInfo
     public int type;
 }
 
-public class Shape
+public class NodeShape
 {
-    public ShapeInfo info;
+    public NodeShapeInfo info;
 }
 
-public class Waypoint : Shape
+public class Waypoint : NodeShape
 {
     public int id;
 }
 
-public class Destination : Shape
+public class Destination : NodeShape
 {
     public int id;
     public string name;
 }
 
-public class ShapeList
+public class NodeShapeList
 {
-    public Shape[] shapes;
+    public NodeShape[] shapes;
 }
 
 public class CustomShapeManager : MonoBehaviour
@@ -53,7 +53,7 @@ public class CustomShapeManager : MonoBehaviour
     [HideInInspector]
     public List<int> numEdgeList = new List<int>();
     [HideInInspector]
-    public List<Shape> shapeList = new List<Shape>();
+    public List<NodeShape> shapeList = new List<NodeShape>();
 
     private bool shapesLoaded = false;
 
@@ -67,7 +67,7 @@ public class CustomShapeManager : MonoBehaviour
 
     public void CreateWay(Vector3 position)
     {
-        ShapeInfo info = new ShapeInfo();
+        NodeShapeInfo info = new NodeShapeInfo();
         info.px = position.x;
         info.py = position.y;
         info.pz = position.z;
@@ -114,7 +114,7 @@ public class CustomShapeManager : MonoBehaviour
         if (index >= 0)
         {
             Waypoint shape = (Waypoint)shapeList[index];
-            ShapeInfo info = new ShapeInfo();
+            NodeShapeInfo info = new NodeShapeInfo();
             info.px = shape.info.px;
             info.py = shape.info.py;
             info.pz = shape.info.pz;
@@ -141,7 +141,7 @@ public class CustomShapeManager : MonoBehaviour
 
     }
 
-    public GameObject ShapeFromInfo(ShapeInfo info)
+    public GameObject ShapeFromInfo(NodeShapeInfo info)
     {
         GameObject shape;
         int type = TYPE_WAY;
@@ -193,18 +193,18 @@ public class CustomShapeManager : MonoBehaviour
 
     public JObject Shapes2JSON()
     {
-        ShapeList shapeList = new ShapeList();
-        shapeList.shapes = new Shape[this.shapeList.Count];
+        NodeShapeList shapeList = new NodeShapeList();
+        shapeList.shapes = new NodeShape[this.shapeList.Count];
         for (int i = 0; i < this.shapeList.Count; i++)
         {
             Debug.Log(this.shapeList[i].info.type);
             if (this.shapeList[i].info.type == TYPE_WAY.GetHashCode())
             {
-                shapeList.shapes[i] = (Waypoint)this.shapeList[i];
+                shapeList.shapes[i] = (Waypoint) this.shapeList[i];
             }
             else if (this.shapeList[i].info.type == TYPE_DEST.GetHashCode())
             {
-                shapeList.shapes[i] = (Destination)this.shapeList[i];
+                shapeList.shapes[i] = (Destination) this.shapeList[i];
             }
         }
 
@@ -230,14 +230,14 @@ public class CustomShapeManager : MonoBehaviour
             Debug.Log("LOADING SHAPES...");
             if (mapMetadata is JObject && mapMetadata["shapes"] is JObject)
             {
-                ShapeList shapeList = mapMetadata["shapes"].ToObject<ShapeList>();
+                NodeShapeList shapeList = mapMetadata["shapes"].ToObject<NodeShapeList>();
                 if (shapeList.shapes == null)
                 {
                     Debug.Log("No shapes dropped");
                     return;
                 }
 
-                foreach (Shape shape in shapeList.shapes)
+                foreach (NodeShape shape in shapeList.shapes)
                 {
                     Debug.Log(shape.info.type);
                     Debug.Log(new Vector3(shape.info.px, shape.info.py, shape.info.pz));

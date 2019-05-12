@@ -17,13 +17,17 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     [SerializeField] GameObject mListElement;
     [SerializeField] RectTransform mListContentParent;
     [SerializeField] ToggleGroup mToggleGroup;
+
+    [SerializeField] GameObject dListElement;
+    [SerializeField] RectTransform dListContentParent;
+    [SerializeField] ToggleGroup dToggleGroup;
+
     [SerializeField] Text statusText;
     [SerializeField] GameObject mapList;
     [SerializeField] GameObject placeList;
     [SerializeField] GameObject navigationButton;
 
     private bool mapListUpdated = false;
-    private bool mapLoaded = false;
 
     private UnityARSessionNativeInterface mSession;
     private bool mFrameUpdated = false;
@@ -34,8 +38,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     private LibPlacenote.MapMetadataSettable mCurrMapDetails;
 
     private bool mReportDebug = false;
-
-    string currMapID = String.Empty;
 
     private LibPlacenote.MapInfo mSelectedMapInfo;
     private string mSelectedMapId
@@ -55,25 +57,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         StartARKit();
         FeaturesVisualizer.EnablePointcloud();
         LibPlacenote.Instance.RegisterListener(this);
-    }
-
-    private void StartARKit()
-    {
-        Debug.Log("Initializing ARKit");
-        Application.targetFrameRate = 60;
-        ConfigureSession(false);
-    }
-
-    private void ConfigureSession(bool clearPlanes)
-    {
-#if !UNITY_EDITOR
-		ARKitWorldTrackingSessionConfiguration config = new ARKitWorldTrackingSessionConfiguration ();
-		config.planeDetection = UnityARPlaneDetection.None;
-		config.alignment = UnityARAlignment.UnityARAlignmentGravity;
-		config.getPointCloudData = true;
-		config.enableLightEstimation = true;
-		mSession.RunWithConfig (config);
-#endif
     }
 
     void OnDisable()
@@ -106,6 +89,25 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         mSession.SetCapturePixelData(true, mImage.y.data, mImage.vu.data);
     }
 
+    private void StartARKit()
+    {
+        Debug.Log("Initializing ARKit");
+        Application.targetFrameRate = 60;
+        ConfigureSession(false);
+    }
+
+    private void ConfigureSession(bool clearPlanes)
+    {
+#if !UNITY_EDITOR
+		ARKitWorldTrackingSessionConfiguration config = new ARKitWorldTrackingSessionConfiguration ();
+		config.planeDetection = UnityARPlaneDetection.None;
+		config.alignment = UnityARAlignment.UnityARAlignmentGravity;
+		config.getPointCloudData = true;
+		config.enableLightEstimation = true;
+		mSession.RunWithConfig (config);
+#endif
+    }
+
     void Update()
     {
         if (mFrameUpdated)
@@ -120,20 +122,20 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             {
                 return;
             }
-            
+
             if (!LibPlacenote.Instance.Initialized())
             {
                 Debug.Log("SDK not yet initialized");
                 statusText.text = "SDK not yet initialized";
                 return;
             }
-            
-            if (!mapListUpdated && LibPlacenote.Instance.Initialized()) 
+
+            if (!mapListUpdated && LibPlacenote.Instance.Initialized())
             {
                 GetListMaps();
             }
-            
-            if (!mapLoaded && !mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
+
+            if (!mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
             {
                 mARKitInit = true;
                 Debug.Log("LOADING MAP!!!!!");
@@ -165,7 +167,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
                                 Debug.Log("Started Debug Report");
                             }
 
-                            mapLoaded = true;
                             LibPlacenote.Instance.StartSession();
                             Debug.Log("Starting session " + mSelectedMapId);
                             statusText.text = "Starting session " + mSelectedMapId;
@@ -177,8 +178,8 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
                         }
                         else
                         {
-                            Debug.Log("Map Downloaded: " + Convert.ToInt32(percentage * 100).ToString() + "%");
-                            statusText.text = "Map Downloaded: " + Convert.ToInt32(percentage * 100).ToString() + " %";
+                            Debug.Log("Map Downloaded: " + ((int)(percentage * 100)).ToString() + "%");
+                            statusText.text = "Map Downloaded: " + ((int)(percentage * 100)).ToString() + " %";
                         }
                     }
                 );
@@ -186,7 +187,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
                 mSelectedMapInfo = null;
                 mapList.SetActive(false);
                 navigationButton.SetActive(true);
-                GetListPlaces();    
+                GetListDests();
             }
 
             Matrix4x4 matrix = mSession.GetCameraPose();
@@ -207,7 +208,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
         LibPlacenote.Instance.ListMaps((mapList) =>
         {
-            foreach (LibPlacenote.MapInfo mapInfoItem in mapList)
+            foreach (LibPlacenote.MapInfo mapInfoItem in mapList)
             {
                 if (mapInfoItem.metadata.userdata != null)
                 {
@@ -238,44 +239,40 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         mSelectedMapInfo = mapInfo;
     }
 
-    public void GetListPlaces()
+    public void GetListDests()
     {
-        foreach (Transform t in mListContentParent.transform)
+        foreach (Transform t in dListContentParent.transform)
         {
             Destroy(t.gameObject);
         }
 
-        LibPlacenote.Instance.ListMaps((mapList) =>
+        foreach (Shape shape in GetComponent<CustomShapeManager>().shapeList)
         {
-            foreach (LibPlacenote.MapInfo mapInfoItem in mapList)
+            if (shape.info.type == 1.GetHashCode())
             {
-                if (mapInfoItem.metadata.userdata != null)
-                {
-                    Debug.Log(mapInfoItem.metadata.userdata.ToString(Formatting.None));
-                }
-                AddPlaceToList(mapInfoItem);
+                Debug.Log("Add " + ((Destination)shape).name);
+                AddDestToList((Destination)shape);
             }
-        });
+        }
 
-        mapListUpdated = true;
-        Debug.Log("Select Map in List");
-        statusText.text = "Select Map in List";
+        Debug.Log("Select Dest in List");
+        statusText.text = "Select Dest in List";
     }
 
-    void AddPlaceToList(LibPlacenote.MapInfo mapInfo)
+    void AddDestToList(Destination dest)
     {
-        GameObject newElement = Instantiate(mListElement) as GameObject;
-        MapInfoElement listElement = newElement.GetComponent<MapInfoElement>();
-        listElement.Initialize(mapInfo, mToggleGroup, mListContentParent, (value) =>
+        GameObject newElement = Instantiate(dListElement) as GameObject;
+        DestInfoElement listElement = newElement.GetComponent<DestInfoElement>();
+        listElement.Initialize(dest, dToggleGroup, dListContentParent, (value) =>
         {
-            OnPlaceSelected(mapInfo);
+            OnDestSelected(dest);
         });
     }
 
-    void OnPlaceSelected(LibPlacenote.MapInfo mapInfo)
+    void OnDestSelected(Destination dest)
     {
 
-        mSelectedMapInfo = mapInfo;
+
     }
 
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
@@ -306,9 +303,9 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     }
 
     public void OnApplicationQuit()
-	{
-		LibPlacenote.Instance.Shutdown();
+    {
+        LibPlacenote.Instance.Shutdown();
         GetComponent<CustomShapeManager>().ClearShapes();
-	}
+    }
 
 }

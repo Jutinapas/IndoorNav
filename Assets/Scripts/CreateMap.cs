@@ -23,7 +23,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     private CustomShapeManager shapeManager;
 
     private bool dropNode = false;
-    private bool overlapNode = false;
     private bool shouldSaveMap = true;
     private bool shouldHit = true;
 
@@ -36,13 +35,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     private LibPlacenote.MapMetadataSettable mCurrMapDetails;
 
     private bool mReportDebug = false;
-
-    private BoxCollider mBoxColliderDummy;
-    private SphereCollider mSphereColliderDummy;
-    private CapsuleCollider mCapColliderDummy;
-
-    private RaycastHit hit;
-    private Ray ray;
 
     public GameObject mapping;
     public GameObject destNaming;

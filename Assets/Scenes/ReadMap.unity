@@ -1252,6 +1252,10 @@ MonoBehaviour:
     type: 3}
   mListContentParent: {fileID: 1927835548}
   mToggleGroup: {fileID: 1927835549}
+  dListElement: {fileID: 1048603414686320, guid: 74d501e6a43664fd78620b5234648f5c,
+    type: 3}
+  dListContentParent: {fileID: 2047091250}
+  dToggleGroup: {fileID: 2047091251}
   statusText: {fileID: 722528232}
   mapList: {fileID: 908179130}
   placeList: {fileID: 829200343}
@@ -1284,8 +1288,8 @@ MonoBehaviour:
   shapePrefabs:
   - {fileID: 1417247514451880, guid: 3b77610f3f9a04b4c844b787aa38eaad, type: 3}
   - {fileID: 1160887633394466, guid: eedaac2fc25db4ab99371a7c1f59dd58, type: 3}
-  - {fileID: 1078755997285888, guid: f8f67d766d3ce4631a946298773ec89d, type: 3}
-  - {fileID: 1503411527038776, guid: 803cd0f1738e645c984ac4ef7cb7e5a6, type: 3}
+  - {fileID: 1417247514451880, guid: 4b8d940aeb7924100b8815db6c2cd1ee, type: 3}
+  - {fileID: 1160887633394466, guid: 245a889372fbf43259613c0c3f103fa3, type: 3}
   - {fileID: 1088472916570732, guid: 2fb6925c40ae28d48ba5f0e23edfd914, type: 3}
   shapeObjList: []
   edgeObjList: []
@@ -1389,7 +1393,7 @@ GameObject:
   - component: {fileID: 829200346}
   - component: {fileID: 829200345}
   m_Layer: 5
-  m_Name: PlaceList
+  m_Name: DestList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

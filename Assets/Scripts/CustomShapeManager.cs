@@ -21,17 +21,8 @@ public class NodeShapeInfo
 
 public class NodeShape
 {
+    public int id;
     public NodeShapeInfo info;
-}
-
-public class Waypoint : NodeShape
-{
-    public int id;
-}
-
-public class Destination : NodeShape
-{
-    public int id;
     public string name;
 }
 
@@ -42,8 +33,6 @@ public class NodeShapeList
 
 public class CustomShapeManager : MonoBehaviour
 {
-    public NavController navController;
-
     public List<GameObject> shapePrefabs = new List<GameObject>();
 
     [HideInInspector]
@@ -57,11 +46,11 @@ public class CustomShapeManager : MonoBehaviour
 
     private bool shapesLoaded = false;
 
+    [HideInInspector] public int numDest = 0;
+
     private const int TYPE_WAY = 0;
     private const int TYPE_DEST = 1;
-    private const int NODE_WAY = 2;
-    private const int NODE_DEST = 3;
-    private const int TYPE_EDGE = 4;
+    private const int TYPE_EDGE = 2;
     private const float MAX_DISTANCE = 1.1f;
     private int id = 0;
 
@@ -76,7 +65,7 @@ public class CustomShapeManager : MonoBehaviour
         info.qz = 0;
         info.qw = 0;
         info.type = TYPE_WAY.GetHashCode();
-        Waypoint waypoint = new Waypoint();
+        NodeShape waypoint = new NodeShape();
         waypoint.id = id;
         waypoint.info = info;
         shapeList.Add(waypoint);
@@ -113,7 +102,7 @@ public class CustomShapeManager : MonoBehaviour
         int index = shapeObjList.FindIndex(shape => shape.transform.position == selectedNode.transform.position);
         if (index >= 0)
         {
-            Waypoint shape = (Waypoint)shapeList[index];
+            NodeShape shape = shapeList[index];
             NodeShapeInfo info = new NodeShapeInfo();
             info.px = shape.info.px;
             info.py = shape.info.py;
@@ -123,7 +112,7 @@ public class CustomShapeManager : MonoBehaviour
             info.qz = 0;
             info.qw = 0;
             info.type = TYPE_DEST.GetHashCode();
-            Destination dest = new Destination();
+            NodeShape dest = new NodeShape();
             dest.id = shape.id;
             dest.name = destName;
             dest.info = info;
@@ -131,11 +120,12 @@ public class CustomShapeManager : MonoBehaviour
             Destroy(selectedNode);
             shapeObjList.RemoveAt(index);
             GameObject gameObject = ShapeFromInfo(dest.info);
+            gameObject.GetComponent<TextMesh>().text = dest.name;
             shapeObjList.Insert(index, gameObject);
 
             shapeList.RemoveAt(index);
             shapeList.Insert(index, dest);
-            Debug.Log(((Destination)shapeList[index]).name);
+            Debug.Log((shapeList[index]).name);
 
         }
 
@@ -143,27 +133,28 @@ public class CustomShapeManager : MonoBehaviour
 
     public GameObject ShapeFromInfo(NodeShapeInfo info)
     {
-        GameObject shape;
-        int type = TYPE_WAY;
         Vector3 position = new Vector3(info.px, info.py, info.pz);
+        int type = info.type;
+        GameObject shape = Instantiate(shapePrefabs[type]);
+        shape.transform.position = position;
+        shape.transform.rotation = new Quaternion(info.qx, info.qy, info.qz, info.qw);
+        shape.transform.localScale = new Vector3(.3f, .3f, .3f);
 
-        if (SceneManager.GetActiveScene().name == "ReadMap")
-        {
-            if (info.type == TYPE_WAY.GetHashCode())
-            {
-                type = NODE_WAY;
+        return shape;
+    }
 
-            }
-            else if (info.type == TYPE_DEST.GetHashCode())
-            {
-                type = NODE_DEST;
-            }
-        }
-        else
+    public GameObject ShapeFromJSON(int id, NodeShapeInfo info)
+    {
+        Vector3 position = new Vector3(info.px, info.py, info.pz);
+        int type = info.type;
+        GameObject shape = Instantiate(shapePrefabs[type]);
+
+        if (shape.GetComponent<Node> () != null) 
         {
-            type = info.type;
-        }
-        shape = Instantiate(shapePrefabs[type]);
+            shape.GetComponent<Node> ().id = id;
+			shape.GetComponent<Node> ().pos = position;
+		}
+
         shape.transform.position = position;
         shape.transform.rotation = new Quaternion(info.qx, info.qy, info.qz, info.qw);
         shape.transform.localScale = new Vector3(.3f, .3f, .3f);
@@ -198,14 +189,7 @@ public class CustomShapeManager : MonoBehaviour
         for (int i = 0; i < this.shapeList.Count; i++)
         {
             Debug.Log(this.shapeList[i].info.type);
-            if (this.shapeList[i].info.type == TYPE_WAY.GetHashCode())
-            {
-                shapeList.shapes[i] = (Waypoint) this.shapeList[i];
-            }
-            else if (this.shapeList[i].info.type == TYPE_DEST.GetHashCode())
-            {
-                shapeList.shapes[i] = (Destination) this.shapeList[i];
-            }
+            shapeList.shapes[i] = this.shapeList[i];
         }
 
         return JObject.FromObject(shapeList);
@@ -227,10 +211,12 @@ public class CustomShapeManager : MonoBehaviour
         if (!shapesLoaded)
         {
             shapesLoaded = true;
-            Debug.Log("LOADING SHAPES...");
-            if (mapMetadata is JObject && mapMetadata["shapes"] is JObject)
+            Debug.Log("Loading shapes");
+            Debug.Log(mapMetadata is JObject);
+            Debug.Log(mapMetadata["data"] is JObject);
+            if (mapMetadata is JObject && mapMetadata["data"] is JObject)
             {
-                NodeShapeList shapeList = mapMetadata["shapes"].ToObject<NodeShapeList>();
+                NodeShapeList shapeList = mapMetadata["data"].ToObject<NodeShapeList>();
                 if (shapeList.shapes == null)
                 {
                     Debug.Log("No shapes dropped");
@@ -241,22 +227,15 @@ public class CustomShapeManager : MonoBehaviour
                 {
                     Debug.Log(shape.info.type);
                     Debug.Log(new Vector3(shape.info.px, shape.info.py, shape.info.pz));
-                    if (shape.info.type == TYPE_WAY.GetHashCode())
+                    this.shapeList.Add(shape);
+                    
+                    GameObject shapeObj = ShapeFromJSON(shape.id, shape.info);
+                    if (shape.info.type == TYPE_DEST.GetHashCode())
                     {
-                        Debug.Log(((Destination)shape).name);
-                        this.shapeList.Add((Destination)shape);
+                        numDest += 1;
+                        shapeObj.GetComponent<TextMesh>().text = shape.name;
                     }
-                    else if (shape.info.type == TYPE_DEST.GetHashCode())
-                    {
-                        this.shapeList.Add((Waypoint)shape);
-                    }
-                    GameObject shapeObj = ShapeFromInfo(shape.info);
                     this.shapeObjList.Add(shapeObj);
-                }
-
-                if (navController != null)
-                {
-                    navController.InitializeNavigation();
                 }
             }
         }

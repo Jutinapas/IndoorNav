@@ -724,8 +724,6 @@ MonoBehaviour:
   navController: {fileID: 0}
   shapePrefabs:
   - {fileID: 1417247514451880, guid: 3b77610f3f9a04b4c844b787aa38eaad, type: 3}
-  - {fileID: 1160887633394466, guid: eedaac2fc25db4ab99371a7c1f59dd58, type: 3}
-  - {fileID: 1078755997285888, guid: f8f67d766d3ce4631a946298773ec89d, type: 3}
   - {fileID: 1503411527038776, guid: 803cd0f1738e645c984ac4ef7cb7e5a6, type: 3}
   - {fileID: 1088472916570732, guid: 2fb6925c40ae28d48ba5f0e23edfd914, type: 3}
   shapeObjList: []
@@ -1523,6 +1521,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: LoadSceneByName
+      objectReference: {fileID: 0}
+    - target: {fileID: 114174357980783008, guid: 133a55c2db1b14b2488315bcbd3cbef6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: Home Create
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 133a55c2db1b14b2488315bcbd3cbef6, type: 3}
@@ -2903,7 +2906,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Home
+          m_StringArgument: Home Create
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,

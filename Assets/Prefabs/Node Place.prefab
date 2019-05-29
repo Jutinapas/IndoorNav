@@ -80,9 +80,10 @@ GameObject:
   - component: {fileID: 65957191983424458}
   - component: {fileID: 23723139701591986}
   - component: {fileID: 102871675387719666}
-  - component: {fileID: 2194996036704605627}
+  - component: {fileID: 4664751581349900762}
+  - component: {fileID: 2209271636826666923}
   m_Layer: 8
-  m_Name: Place
+  m_Name: Node Place
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -175,7 +176,22 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
---- !u!114 &2194996036704605627
+--- !u!114 &4664751581349900762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1503411527038776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f52ea4ebd238041d38b5b00aa7e3034d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pos: {x: 0, y: 0, z: 0}
+  id: 0
+  neighbors: []
+--- !u!114 &2209271636826666923
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

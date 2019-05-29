@@ -5,7 +5,8 @@ Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: arrow
   m_Shader: {fileID: 4800000, guid: 0fc06dbae827e7646bd0850ff121daa5, type: 3}
   m_ShaderKeywords: _EMISSION _SPECULAR_SETUP
@@ -89,6 +90,6 @@ Material:
     m_Colors:
     - _Color: {r: 0.5944731, g: 0.6886792, b: 0.62378776, a: 1}
     - _EmissionColor: {r: 15.210199, g: 5.849327, b: 0.6457157, a: 1}
-    - _MKGlowColor: {r: 0.11477798, g: 0.9056604, b: 0, a: 1}
-    - _MKGlowTexColor: {r: 0, g: 1, b: 0.004989147, a: 1}
+    - _MKGlowColor: {r: 0, g: 0.39259267, b: 1, a: 1}
+    - _MKGlowTexColor: {r: 0, g: 0.028357267, b: 1, a: 1}
     - _SpecColor: {r: 0, g: 0, b: 0, a: 1}

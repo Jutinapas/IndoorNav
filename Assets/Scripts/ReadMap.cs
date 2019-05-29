@@ -13,6 +13,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 {
 
     private const string MAP_NAME = "GenericMap";
+    public NavController navController;
 
     [SerializeField] GameObject mListElement;
     [SerializeField] RectTransform mListContentParent;
@@ -24,20 +25,17 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     [SerializeField] Text statusText;
     [SerializeField] GameObject mapList;
-    [SerializeField] GameObject placeList;
+    [SerializeField] GameObject destList;
     [SerializeField] GameObject navigationButton;
 
     private bool mapListUpdated = false;
+    private bool destListUpdated = false;
+    private bool isLocalize = false;
 
     private UnityARSessionNativeInterface mSession;
-    private bool mFrameUpdated = false;
-    private UnityARImageFrameData mImage = null;
-    private UnityARCamera mARCamera;
     private bool mARKitInit = false;
 
     private LibPlacenote.MapMetadataSettable mCurrMapDetails;
-
-    private bool mReportDebug = false;
 
     private LibPlacenote.MapInfo mSelectedMapInfo;
     private string mSelectedMapId
@@ -53,40 +51,9 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         Input.location.Start();
 
         mSession = UnityARSessionNativeInterface.GetARSessionNativeInterface();
-        UnityARSessionNativeInterface.ARFrameUpdatedEvent += ARFrameUpdated;
         StartARKit();
         FeaturesVisualizer.EnablePointcloud();
         LibPlacenote.Instance.RegisterListener(this);
-    }
-
-    void OnDisable()
-    {
-        UnityARSessionNativeInterface.ARFrameUpdatedEvent -= ARFrameUpdated;
-    }
-
-    private void ARFrameUpdated(UnityARCamera camera)
-    {
-        mFrameUpdated = true;
-        mARCamera = camera;
-    }
-
-    private void InitARFrameBuffer()
-    {
-        mImage = new UnityARImageFrameData();
-
-        int yBufSize = mARCamera.videoParams.yWidth * mARCamera.videoParams.yHeight;
-        mImage.y.data = Marshal.AllocHGlobal(yBufSize);
-        mImage.y.width = (ulong)mARCamera.videoParams.yWidth;
-        mImage.y.height = (ulong)mARCamera.videoParams.yHeight;
-        mImage.y.stride = (ulong)mARCamera.videoParams.yWidth;
-
-        int vuBufSize = mARCamera.videoParams.yWidth * mARCamera.videoParams.yWidth / 2;
-        mImage.vu.data = Marshal.AllocHGlobal(vuBufSize);
-        mImage.vu.width = (ulong)mARCamera.videoParams.yWidth / 2;
-        mImage.vu.height = (ulong)mARCamera.videoParams.yHeight / 2;
-        mImage.vu.stride = (ulong)mARCamera.videoParams.yWidth;
-
-        mSession.SetCapturePixelData(true, mImage.y.data, mImage.vu.data);
     }
 
     private void StartARKit()
@@ -110,93 +77,50 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     void Update()
     {
-        if (mFrameUpdated)
+
+        if (!LibPlacenote.Instance.Initialized())
         {
-            mFrameUpdated = false;
-            if (mImage == null)
-            {
-                InitARFrameBuffer();
-            }
-
-            if (mARCamera.trackingState == ARTrackingState.ARTrackingStateNotAvailable)
-            {
-                return;
-            }
-
-            if (!LibPlacenote.Instance.Initialized())
-            {
-                Debug.Log("SDK not yet initialized");
-                statusText.text = "SDK not yet initialized";
-                return;
-            }
-
-            if (!mapListUpdated && LibPlacenote.Instance.Initialized())
-            {
-                GetListMaps();
-            }
-
-            if (!mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
-            {
-                mARKitInit = true;
-                Debug.Log("LOADING MAP!!!!!");
-                statusText.text = "LOADING MAP!!!!!";
-
-                LibPlacenote.Instance.LoadMap(mSelectedMapId,
-                    (completed, faulted, percentage) =>
-                    {
-                        if (completed)
-                        {
-                            if (mReportDebug)
-                            {
-                                LibPlacenote.Instance.StartRecordDataset(
-                                    (datasetCompleted, datasetFaulted, datasetPercentage) =>
-                                    {
-                                        if (datasetCompleted)
-                                        {
-                                            Debug.Log("Dataset Upload Complete");
-                                        }
-                                        else if (datasetFaulted)
-                                        {
-                                            Debug.Log("Dataset Upload Faulted");
-                                        }
-                                        else
-                                        {
-                                            Debug.Log("Dataset Upload: " + datasetPercentage.ToString("F2") + "/1.0");
-                                        }
-                                    });
-                                Debug.Log("Started Debug Report");
-                            }
-
-                            LibPlacenote.Instance.StartSession();
-                            Debug.Log("Starting session " + mSelectedMapId);
-                            statusText.text = "Starting session " + mSelectedMapId;
-                        }
-                        else if (faulted)
-                        {
-                            Debug.Log("Failed to load " + mSelectedMapId);
-                            statusText.text = "Failed to load " + mSelectedMapId;
-                        }
-                        else
-                        {
-                            Debug.Log("Map Downloaded: " + ((int)(percentage * 100)).ToString() + "%");
-                            statusText.text = "Map Downloaded: " + ((int)(percentage * 100)).ToString() + " %";
-                        }
-                    }
-                );
-
-                mSelectedMapInfo = null;
-                mapList.SetActive(false);
-                navigationButton.SetActive(true);
-                GetListDests();
-            }
-
-            Matrix4x4 matrix = mSession.GetCameraPose();
-
-            Vector3 arkitPosition = PNUtility.MatrixOps.GetPosition(matrix);
-            Quaternion arkitQuat = PNUtility.MatrixOps.GetRotation(matrix);
-
-            LibPlacenote.Instance.SendARFrame(mImage, arkitPosition, arkitQuat, mARCamera.videoParams.screenOrientation);
+            Debug.Log("SDK ยังไม่ถูกติดตั้ง");
+            statusText.text = "SDK ยังไม่ถูกติดตั้ง";
+            return;
         }
+
+        if (!mapListUpdated && LibPlacenote.Instance.Initialized())
+        {
+            GetListMaps();
+        }
+
+        if (!mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
+        {
+            mARKitInit = true;
+            Debug.Log("กำลังดาวน์โหลด");
+            statusText.text = "กำลังดาวน์โหลด";
+
+            LibPlacenote.Instance.LoadMap(mSelectedMapId,
+                (completed, faulted, percentage) =>
+                {
+                    if (completed)
+                    {
+                        LibPlacenote.Instance.StartSession();
+                        Debug.Log("Starting Session " + mSelectedMapId);
+                        statusText.text = "เริ่มค้นหาตำแหน่ง";
+                    }
+                    else if (faulted)
+                    {
+                        Debug.Log("Failed to Load " + mSelectedMapId);
+                        statusText.text = "ไม่สามารถดาวน์โหลดได้";
+                    }
+                    else
+                    {
+                        Debug.Log("Downloaded " + ((int)(percentage * 100)).ToString() + "%");
+                        statusText.text = "กำลังดาวน์โหลด " + ((int)(percentage * 100)).ToString() + " %";
+                    }
+                }
+            );
+
+            mapList.SetActive(false);
+        }
+
     }
 
     public void GetListMaps()
@@ -220,7 +144,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
         mapListUpdated = true;
         Debug.Log("Select Map in List");
-        statusText.text = "Select Map in List";
+        statusText.text = "เลือกแผนที่ที่ต้องการ";
     }
 
     void AddMapToList(LibPlacenote.MapInfo mapInfo)
@@ -235,7 +159,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     void OnMapSelected(LibPlacenote.MapInfo mapInfo)
     {
-
         mSelectedMapInfo = mapInfo;
     }
 
@@ -250,55 +173,75 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         {
             if (shape.info.type == 1.GetHashCode())
             {
-                Debug.Log("Add " + ((Destination)shape).name);
-                AddDestToList((Destination)shape);
+                Debug.Log("Add " + shape.name);
+                AddDestToList(shape);
             }
         }
 
         Debug.Log("Select Dest in List");
-        statusText.text = "Select Dest in List";
+        statusText.text = "เลือกสถานที่ที่ต้องการ";
     }
 
-    void AddDestToList(Destination dest)
+    void AddDestToList(NodeShape dest)
     {
         GameObject newElement = Instantiate(dListElement) as GameObject;
         DestInfoElement listElement = newElement.GetComponent<DestInfoElement>();
         listElement.Initialize(dest, dToggleGroup, dListContentParent, (value) =>
         {
+            Debug.Log(dest.name);
             OnDestSelected(dest);
         });
     }
 
-    void OnDestSelected(Destination dest)
+    void OnDestSelected(NodeShape dest)
     {
+        navController.SetInitialized(false);
+        navController.SetComplete(false);
+        Debug.Log("Start Init");
+        if (navController != null)
+        {
+            navController.InitializeNavigation ();
+        }
+        navController.InitNav(dest.id);
+        destList.SetActive(false);
+    }
 
-
+    public void OnNavButtonClick()
+    {
+        if (!destListUpdated) 
+        {
+            GetListDests();
+        }
+        if (destList.activeSelf) {
+            destList.SetActive(false);
+        } else {
+            destList.SetActive(true);
+        }
     }
 
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
 
     public void OnStatusChange(LibPlacenote.MappingStatus prevStatus, LibPlacenote.MappingStatus currStatus)
     {
-        Debug.Log("prevStatus: " + prevStatus.ToString() + " currStatus: " + currStatus.ToString());
         if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.LOST)
         {
-            Debug.Log("Localized: " + mSelectedMapInfo.metadata.name);
-            GetComponent<CustomShapeManager>().LoadShapesJSON(mSelectedMapInfo.metadata.userdata);
-            FeaturesVisualizer.DisablePointcloud();
+            if (!isLocalize)
+            {
+                isLocalize = true;
+                statusText.text = "ระบุตำแหน่งสำเร็จ";
+                FeaturesVisualizer.DisablePointcloud();
+                GetComponent<CustomShapeManager>().LoadShapesJSON(mSelectedMapInfo.metadata.userdata);
+                navigationButton.SetActive(true);
+            }
         }
         else if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.WAITING)
         {
-            Debug.Log("Mapping");
         }
         else if (currStatus == LibPlacenote.MappingStatus.LOST)
         {
-            Debug.Log("Searching for position lock");
         }
         else if (currStatus == LibPlacenote.MappingStatus.WAITING)
         {
-            // if (GetComponent<CustomShapeManager>().placeObjList.Count != 0) {
-            //     //GetComponent<CustomShapeManager>().ClearShapes();
-            // }
         }
     }
 

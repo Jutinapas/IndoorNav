@@ -27,14 +27,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     private bool shouldHit = true;
 
     private UnityARSessionNativeInterface mSession;
-    private bool mFrameUpdated = false;
-    private UnityARImageFrameData mImage = null;
-    private UnityARCamera mARCamera;
     private bool mARKitInit = false;
 
     private LibPlacenote.MapMetadataSettable mCurrMapDetails;
-
-    private bool mReportDebug = false;
 
     public GameObject mapping;
     public GameObject destNaming;
@@ -55,7 +50,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         Input.location.Start();
 
         mSession = UnityARSessionNativeInterface.GetARSessionNativeInterface();
-        UnityARSessionNativeInterface.ARFrameUpdatedEvent += ARFrameUpdated;
         StartARKit();
         FeaturesVisualizer.EnablePointcloud();
         LibPlacenote.Instance.RegisterListener(this);
@@ -87,124 +81,72 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 #endif
     }
 
-    private void ARFrameUpdated(UnityARCamera camera)
-    {
-        mFrameUpdated = true;
-        mARCamera = camera;
-    }
-
-    private void InitARFrameBuffer()
-    {
-        mImage = new UnityARImageFrameData();
-
-        int yBufSize = mARCamera.videoParams.yWidth * mARCamera.videoParams.yHeight;
-        mImage.y.data = Marshal.AllocHGlobal(yBufSize);
-        mImage.y.width = (ulong)mARCamera.videoParams.yWidth;
-        mImage.y.height = (ulong)mARCamera.videoParams.yHeight;
-        mImage.y.stride = (ulong)mARCamera.videoParams.yWidth;
-
-        int vuBufSize = mARCamera.videoParams.yWidth * mARCamera.videoParams.yWidth / 2;
-        mImage.vu.data = Marshal.AllocHGlobal(vuBufSize);
-        mImage.vu.width = (ulong)mARCamera.videoParams.yWidth / 2;
-        mImage.vu.height = (ulong)mARCamera.videoParams.yHeight / 2;
-        mImage.vu.stride = (ulong)mARCamera.videoParams.yWidth;
-
-        mSession.SetCapturePixelData(true, mImage.y.data, mImage.vu.data);
-    }
-
-    void OnDisable()
-    {
-        UnityARSessionNativeInterface.ARFrameUpdatedEvent -= ARFrameUpdated;
-    }
-
     void Update()
     {
-        if (mFrameUpdated)
+
+        if (!mARKitInit && LibPlacenote.Instance.Initialized())
         {
-            mFrameUpdated = false;
-            if (mImage == null)
+            mARKitInit = true;
+            statusText.text = "พร้อมสร้างแผนที่";
+            Debug.Log("พร้อมสร้างแผนที่");
+            StartSavingMap();
+        }
+
+        if (dropNode && mARKitInit)
+        {
+            Transform player = Camera.main.transform;
+
+            Collider[] hitColliders = Physics.OverlapSphere(player.position, 1f);
+            int i = 0;
+            while (i < hitColliders.Length)
             {
-                InitARFrameBuffer();
-            }
-
-            if (mARCamera.trackingState == ARTrackingState.ARTrackingStateNotAvailable)
-            {
-                return;
-            }
-            else if (!mARKitInit && LibPlacenote.Instance.Initialized())
-            {
-                mARKitInit = true;
-                statusText.text = "พร้อมสร้างแผนที่";
-                Debug.Log("พร้อมสร้างแผนที่");
-                StartSavingMap();
-            }
-
-            Matrix4x4 matrix = mSession.GetCameraPose();
-
-            Vector3 arkitPosition = PNUtility.MatrixOps.GetPosition(matrix);
-            Quaternion arkitQuat = PNUtility.MatrixOps.GetRotation(matrix);
-
-            LibPlacenote.Instance.SendARFrame(mImage, arkitPosition, arkitQuat, mARCamera.videoParams.screenOrientation);
-
-            if (dropNode)
-            {
-                Transform player = Camera.main.transform;
-
-                Collider[] hitColliders = Physics.OverlapSphere(player.position, 1f);
-                int i = 0;
-                while (i < hitColliders.Length)
+                if (hitColliders[i].CompareTag("Node"))
                 {
-                    if (hitColliders[i].CompareTag("Node"))
-                    {
-                        return;
-                    }
-                    i++;
+                    return;
                 }
-                Vector3 position = player.position;
-                position.y = -.5f;
-                Debug.Log(position);
-                shapeManager.CreateWay(position);
+                i++;
             }
+            Vector3 position = player.position;
+            position.y = -.5f;
+            Debug.Log(position);
+            shapeManager.CreateWay(position);
+        }
 
-            if (shouldHit && !dropNode && selectedNode == null)
+        if (shouldHit && !dropNode && selectedNode == null && mARKitInit)
+        {
+            if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
             {
-                if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
+                Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+                RaycastHit hit;
+
+                Debug.Log("Tapped!");
+                statusText.text = "สัมผัส!";
+
+                if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint(Clone)")
                 {
-                    Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
-                    RaycastHit hit;
+                    shouldHit = false;
+                    mapping.SetActive(false);
+                    destNaming.SetActive(true);
+                    selectedNode = hit.transform.gameObject;
 
                     Debug.Log("Tapped!");
-                    statusText.text = "สัมผัส!";
+                    statusText.text = "โดน!";
 
-                    if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint(Clone)")
+                    Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
+                    foreach (Renderer renderer in renderers)
                     {
-                        shouldHit = false;
-                        mapping.SetActive(false);
-                        destNaming.SetActive(true);
-                        selectedNode = hit.transform.gameObject;
-
+                        renderer.sharedMaterial = materials[DIAMOND_MATERIAL];
                         Debug.Log("Tapped!");
-                        statusText.text = "โดน!";
-
-                        Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
-                        foreach (Renderer renderer in renderers)
-                        {
-                            renderer.sharedMaterial = materials[DIAMOND_MATERIAL];
-                            Debug.Log("Tapped!");
-                            statusText.text = "เปลี่ยนสี!";
-                        }
-
+                        statusText.text = "เปลี่ยนสี!";
                     }
+
                 }
             }
-
         }
     }
 
     void StartSavingMap()
     {
-        ConfigureSession();
-
         if (!LibPlacenote.Instance.Initialized())
         {
             statusText.text = "เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง";
@@ -215,27 +157,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         statusText.text = "เริ่มสร้างแผนที่";
         Debug.Log("เริ่มสร้างแผนที่");
         LibPlacenote.Instance.StartSession();
-
-        if (mReportDebug)
-        {
-            LibPlacenote.Instance.StartRecordDataset(
-                (completed, faulted, percentage) =>
-                {
-                    if (completed)
-                    {
-                        Debug.Log("Dataset Upload Complete");
-                    }
-                    else if (faulted)
-                    {
-                        Debug.Log("Dataset Upload Faulted");
-                    }
-                    else
-                    {
-                        Debug.Log("Dataset Upload: " + (percentage * 100).ToString("F2"));
-                    }
-                });
-            Debug.Log("Started Debug Report");
-        }
     }
 
     public void OnToPathClick()
@@ -378,8 +299,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     statusText.text = metadata.name;
                     Debug.Log(metadata.name);
 
-                    JObject shapes = GetComponent<CustomShapeManager>().Shapes2JSON();
-                    metadata.userdata = shapes;
+                    JObject userdata = new JObject();
+                    metadata.userdata = userdata;
+
+                    JObject data = GetComponent<CustomShapeManager>().Shapes2JSON();
+                    userdata["data"] = data;
 
                     if (useLocation)
                     {
@@ -408,8 +332,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     }
                     else
                     {
-                        Debug.Log("กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int) (percentage * 100)).ToString() + "%");
-                        statusText.text = "กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int) (percentage * 100)).ToString() + "%";
+                        Debug.Log("กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int)(percentage * 100)).ToString() + "%");
+                        statusText.text = "กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int)(percentage * 100)).ToString() + "%";
                     }
                 }
             );

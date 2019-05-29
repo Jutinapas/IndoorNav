@@ -7,11 +7,11 @@ using Newtonsoft.Json.Linq;
 
 public class DestInfoElement : MonoBehaviour
 {
-    [HideInInspector] int id;
+    [SerializeField] int id;
 	[SerializeField] Text dNameText;
 	[SerializeField] Toggle dToggle;
 
-	public void Initialize (Destination dest, ToggleGroup toggleGroup,
+	public void Initialize (NodeShape dest, ToggleGroup toggleGroup,
 	                       RectTransform listParent, UnityAction<bool> onToggleChanged)
 	{
         id = dest.id;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using TMPro;
 
 public class Node : MonoBehaviour
 {
@@ -27,7 +28,7 @@ public class Node : MonoBehaviour
     {
         transform.GetChild(0).gameObject.SetActive(false);
         scale = transform.localScale;
-        if (GetComponent<TextMesh>() != null) isDestination = true;
+        if (GetComponent<TextMeshPro>() != null) isDestination = true;
 
 #if UNITY_EDITOR
         pos = transform.position;

@@ -120,7 +120,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                 RaycastHit hit;
 
                 Debug.Log("Tapped!");
-                statusText.text = "สัมผัส!";
 
                 if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint(Clone)")
                 {
@@ -130,14 +129,12 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     selectedNode = hit.transform.gameObject;
 
                     Debug.Log("Tapped!");
-                    statusText.text = "โดน!";
 
                     Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
                     foreach (Renderer renderer in renderers)
                     {
                         renderer.sharedMaterial = materials[DIAMOND_MATERIAL];
                         Debug.Log("Tapped!");
-                        statusText.text = "เปลี่ยนสี!";
                     }
 
                 }
@@ -149,7 +146,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     {
         if (!LibPlacenote.Instance.Initialized())
         {
-            statusText.text = "เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง";
+            statusText.text = "เกิดข้อผิดพลาด";
             Debug.Log("เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง");
             return;
         }
@@ -176,8 +173,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     public void OnUndoClick()
     {
         shapeManager.UndoShape();
-        statusText.text = "ย้อนการสร้างเส้นทาง";
-        Debug.Log("ย้อนการสร้างเส้นทาง");
+        statusText.text = "ลบเส้นทาง";
+        Debug.Log("ลบเส้นทาง");
     }
 
     public void OnSaveDestClick()
@@ -199,7 +196,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
             {
                 renderer.sharedMaterial = materials[WAYPOINT_MATERIAL];
                 Debug.Log("Tapped!");
-                statusText.text = "เปลี่ยนสีกลับ!";
             }
             backFromDestNaming();
         }
@@ -287,8 +283,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
             bool useLocation = Input.location.status == LocationServiceStatus.Running;
             LocationInfo locationInfo = Input.location.lastData;
 
-            statusText.text = "กำลังอัพโหลด...";
-            Debug.Log("กำลังอัพโหลด...");
+            statusText.text = "กำลังอัพโหลด";
+            Debug.Log("กำลังอัพโหลด");
             LibPlacenote.Instance.SaveMap(
                 (mapId) =>
                 {
@@ -320,20 +316,20 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                 {
                     if (completed)
                     {
-                        Debug.Log("อัพโหลดเสร็จสิ้น:" + mCurrMapDetails.name);
-                        statusText.text = "อัพโหลดเสร็จสิ้น:" + mCurrMapDetails.name;
+                        Debug.Log("อัพโหลดเสร็จสิ้น: " + mCurrMapDetails.name);
+                        statusText.text = "อัพโหลดเสร็จสิ้น";
                         homeButton.SetActive(true);
                     }
                     else if (faulted)
                     {
                         Debug.Log("เกิดข้อผิดพลาด: " + mCurrMapDetails.name);
-                        statusText.text = "เกิดข้อผิดพลาด: " + mCurrMapDetails.name;
+                        statusText.text = "เกิดข้อผิดพลาด";
                         homeButton.SetActive(true);
                     }
                     else
                     {
                         Debug.Log("กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int)(percentage * 100)).ToString() + "%");
-                        statusText.text = "กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int)(percentage * 100)).ToString() + "%";
+                        statusText.text = "กำลังอัพโหลด " + ((int)(percentage * 100)).ToString() + "%";
                     }
                 }
             );

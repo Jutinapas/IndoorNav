@@ -200,7 +200,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         Debug.Log("Start Init");
         if (navController != null)
         {
-            navController.InitializeNavigation ();
+            navController.InitializeNavigation();
         }
         navController.InitNav(dest.id);
         destList.SetActive(false);
@@ -208,14 +208,24 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     public void OnNavButtonClick()
     {
-        if (!destListUpdated) 
+        if (!destListUpdated)
         {
-            GetListDests();
-        }
-        if (destList.activeSelf) {
-            destList.SetActive(false);
-        } else {
             destList.SetActive(true);
+            GetListDests();
+            destListUpdated = true;
+        }
+        else
+        {
+            if (destList.activeSelf)
+            {
+                destList.SetActive(false);
+                navigationButton.GetComponentInChildren<Text>().text = "เลือกสถานที่";
+            }
+            else
+            {
+                destList.SetActive(true);
+                navigationButton.GetComponentInChildren<Text>().text = "ย้อนกลับ";
+            }
         }
     }
 

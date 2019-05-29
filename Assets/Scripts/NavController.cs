@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using TMPro;
 
 public class NavController : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class NavController : MonoBehaviour
 
     IEnumerator DelayNavigation()
     {
-        while (FindObjectsOfType<TextMesh>().Count() != FindObjectOfType<CustomShapeManager>().numDest)
+        while (FindObjectsOfType<TextMeshPro>().Count() != FindObjectOfType<CustomShapeManager>().numDest)
         {
             yield return new WaitForSeconds(.5f);
         }
@@ -45,10 +46,10 @@ public class NavController : MonoBehaviour
             Node closestNode = ReturnClosestNode(allNodes, transform.position);
             Debug.Log("Closest: " + closestNode.gameObject.name);
             
-            TextMesh[] dests = FindObjectsOfType<TextMesh>();
+            TextMeshPro[] dests = FindObjectsOfType<TextMeshPro>();
 
             Node target = null;
-            foreach (TextMesh dest in dests)
+            foreach (TextMeshPro dest in dests)
             {
                 Node node = dest.gameObject.GetComponent<Node>();
                 if (node.id == id)

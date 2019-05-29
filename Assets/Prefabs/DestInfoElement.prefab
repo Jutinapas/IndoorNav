@@ -200,6 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4edf7bc0b701c45dabb381708610519f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: 0
   dNameText: {fileID: 114204626104576414}
   dToggle: {fileID: 114160523106784432}
 --- !u!1 &1552594387821458
@@ -269,7 +270,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 28
+    m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0

@@ -6,6 +6,7 @@ using UnityEngine.XR.iOS;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class NodeShapeInfo
 {
@@ -120,7 +121,7 @@ public class CustomShapeManager : MonoBehaviour
             Destroy(selectedNode);
             shapeObjList.RemoveAt(index);
             GameObject gameObject = ShapeFromInfo(dest.info);
-            gameObject.GetComponent<TextMesh>().text = dest.name;
+            gameObject.GetComponent<TextMeshPro>().text = dest.name;
             shapeObjList.Insert(index, gameObject);
 
             shapeList.RemoveAt(index);
@@ -233,7 +234,7 @@ public class CustomShapeManager : MonoBehaviour
                     if (shape.info.type == TYPE_DEST.GetHashCode())
                     {
                         numDest += 1;
-                        shapeObj.GetComponent<TextMesh>().text = shape.name;
+                        shapeObj.GetComponent<TextMeshPro>().text = shape.name;
                     }
                     this.shapeObjList.Add(shapeObj);
                 }

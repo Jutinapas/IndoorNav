@@ -9,16 +9,14 @@ public class DestInfoElement : MonoBehaviour
 {
     [SerializeField] int id;
 	[SerializeField] Text dNameText;
-	[SerializeField] Toggle dToggle;
+	[SerializeField] Button dButton;
 
-	public void Initialize (NodeShape dest, ToggleGroup toggleGroup,
-	                       RectTransform listParent, UnityAction<bool> onToggleChanged)
+	public void Initialize (NodeShape dest, RectTransform listParent, UnityAction onButtonClick)
 	{
         id = dest.id;
 		dNameText.text = dest.name;
-		dToggle.group = toggleGroup;
 		gameObject.transform.SetParent (listParent);
-		dToggle.onValueChanged.AddListener (onToggleChanged);
+		dButton.onClick.AddListener (onButtonClick);
 	}
 
 }

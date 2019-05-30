@@ -112,6 +112,7 @@ public class NavController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("TriggerEnter " + other.tag);
         if (_initializedComplete && other.CompareTag("Node"))
         {
             currNodeIndex = path.IndexOf(other.GetComponent<Node>());
@@ -120,6 +121,15 @@ public class NavController : MonoBehaviour
                 path[currNodeIndex + 1].Activate(true);
             }
         }
+    }
+
+    public void DeactivatePath()
+    {
+        foreach (Node node in path)
+        {
+            node.Activate(false);
+        }
+        path.Clear();
     }
 
     public void SetInitialized(bool init)

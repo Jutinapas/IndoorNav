@@ -2313,6 +2313,21 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
       value: Home Read
       objectReference: {fileID: 0}
+    - target: {fileID: 5773907036468388970, guid: 133a55c2db1b14b2488315bcbd3cbef6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 766341136}
+    - target: {fileID: 5773907036468388970, guid: 133a55c2db1b14b2488315bcbd3cbef6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: LoadSceneByName
+      objectReference: {fileID: 0}
+    - target: {fileID: 5773907036468388970, guid: 133a55c2db1b14b2488315bcbd3cbef6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: Home Read
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 133a55c2db1b14b2488315bcbd3cbef6, type: 3}
 --- !u!224 &1438920854 stripped
@@ -2480,7 +2495,7 @@ CapsuleCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   m_Radius: 1
-  m_Height: 6
+  m_Height: 3
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1799867782

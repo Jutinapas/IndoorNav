@@ -186,7 +186,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     {
         GameObject newElement = Instantiate(dListElement) as GameObject;
         DestInfoElement listElement = newElement.GetComponent<DestInfoElement>();
-        listElement.Initialize(dest, dToggleGroup, dListContentParent, (value) =>
+        listElement.Initialize(dest, dListContentParent, () =>
         {
             Debug.Log(dest.name);
             OnDestSelected(dest);
@@ -195,13 +195,14 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     void OnDestSelected(NodeShape dest)
     {
-        navController.SetInitialized(false);
-        navController.SetComplete(false);
-        Debug.Log("Start Init");
         if (navController != null)
         {
             navController.InitializeNavigation();
         }
+        navController.SetInitialized(false);
+        navController.SetComplete(false);
+        navController.DeactivatePath();
+        Debug.Log("Start Init");
         navController.InitNav(dest.id);
         destList.SetActive(false);
     }

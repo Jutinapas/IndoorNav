@@ -48,7 +48,7 @@ public class Node : MonoBehaviour
     {
         if (!isDestination)
         {
-            transform.localScale = scale * (1 + Mathf.Sin(Mathf.PI * Time.time) * .2f);
+            transform.localScale = scale * (1 + Mathf.Sin(Mathf.PI * Time.time) * .05f);
         }
     }
 

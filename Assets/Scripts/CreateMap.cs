@@ -32,6 +32,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     private LibPlacenote.MapMetadataSettable mCurrMapDetails;
 
     public GameObject mapping;
+    public GameObject pathing;
     public GameObject destNaming;
     public GameObject mapNaming;
     public GameObject saving;
@@ -51,6 +52,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
         mSession = UnityARSessionNativeInterface.GetARSessionNativeInterface();
         StartARKit();
+        FeaturesVisualizer.clearPointcloud();
         FeaturesVisualizer.EnablePointcloud();
         LibPlacenote.Instance.RegisterListener(this);
     }
@@ -96,7 +98,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         {
             Transform player = Camera.main.transform;
 
-            Collider[] hitColliders = Physics.OverlapSphere(player.position, 1f);
+            Collider[] hitColliders = Physics.OverlapSphere(player.position, .75f);
             int i = 0;
             while (i < hitColliders.Length)
             {
@@ -336,6 +338,23 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         }
     }
 
+    public void OnExitButtonClick()
+    {
+        mapping.SetActive(true);
+        pathing.SetActive(false);
+        mapNaming.SetActive(false);
+        destNaming.SetActive(false);
+        saving.SetActive(false);
+        homeButton.SetActive(false);
+        destName = "";
+        mapName = "";
+        destNameText.text = "";
+        mapNameText.text = "";
+        LibPlacenote.Instance.StopSession ();
+        FeaturesVisualizer.clearPointcloud();
+        GetComponent<ShapeManager>().ClearShapes();
+    }
+
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
 
     public void OnStatusChange(LibPlacenote.MappingStatus prevStatus, LibPlacenote.MappingStatus currStatus)
@@ -344,7 +363,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.LOST)
         {
             Debug.Log("Localized");
-            //GetComponent<ShapeManager> ().LoadShapesJSON (mSelectedMapInfo.metadata.userdata);
         }
         else if (currStatus == LibPlacenote.MappingStatus.RUNNING && prevStatus == LibPlacenote.MappingStatus.WAITING)
         {

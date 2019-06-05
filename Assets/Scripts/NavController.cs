@@ -13,7 +13,7 @@ public class NavController : MonoBehaviour
     private bool _initializedComplete = false;
     private List<Node> path = new List<Node>();
     private int currNodeIndex = 0;
-    private float maxDistance = 1.1f;
+    private float maxDistance = .76f;
 
     private void Start()
     {
@@ -86,10 +86,10 @@ public class NavController : MonoBehaviour
             {
                 str += path[i].id + " >> ";
                 path[i].NextInList = path[i + 1];
+                path[i].Activate(true);
             }
             Debug.Log(str);
 
-            path[0].Activate(true);
             _initializedComplete = true;
         }
     }
@@ -112,22 +112,23 @@ public class NavController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("TriggerEnter " + other.tag);
-        if (_initializedComplete && other.CompareTag("Node"))
-        {
-            currNodeIndex = path.IndexOf(other.GetComponent<Node>());
-            if (currNodeIndex < path.Count - 1)
-            {
-                path[currNodeIndex + 1].Activate(true);
-            }
-        }
+        // Debug.Log("TriggerEnter " + other.tag);
+        // if (_initializedComplete && other.CompareTag("Node"))
+        // {
+        //     currNodeIndex = path.IndexOf(other.GetComponent<Node>());
+        //     if (currNodeIndex < path.Count - 1)
+        //     {
+        //         path[currNodeIndex + 1].Activate(true);
+        //     }
+        // }
     }
 
     public void DeactivatePath()
     {
-        foreach (Node node in path)
+        for (int i = 0; i < path.Count - 1; i++)
         {
-            node.Activate(false);
+            path[i].NextInList = null;
+            path[i].Activate(false);
         }
         path.Clear();
     }

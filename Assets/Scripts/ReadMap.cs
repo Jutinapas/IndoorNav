@@ -230,6 +230,16 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         }
     }
 
+    public void OnExitButtonClick()
+    {
+        destList.SetActive(false);
+        navigationButton.SetActive(false);
+        mapList.SetActive(true);
+        LibPlacenote.Instance.StopSession ();
+        FeaturesVisualizer.clearPointcloud();
+        GetComponent<ShapeManager>().ClearShapes();
+    }
+
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
 
     public void OnStatusChange(LibPlacenote.MappingStatus prevStatus, LibPlacenote.MappingStatus currStatus)
@@ -253,6 +263,10 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         }
         else if (currStatus == LibPlacenote.MappingStatus.WAITING)
         {
+            if (GetComponent<CustomShapeManager>().shapeObjList.Count != 0)
+            {
+                GetComponent<CustomShapeManager>().ClearShapes();
+            }
         }
     }
 

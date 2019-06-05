@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CustomShapeManager))]
 public class CreateMap : MonoBehaviour, PlacenoteListener
@@ -121,8 +122,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                 Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
                 RaycastHit hit;
 
-                Debug.Log("Tapped!");
-
                 if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint(Clone)")
                 {
                     shouldHit = false;
@@ -130,13 +129,10 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     destNaming.SetActive(true);
                     selectedNode = hit.transform.gameObject;
 
-                    Debug.Log("Tapped!");
-
                     Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
                     foreach (Renderer renderer in renderers)
                     {
                         renderer.sharedMaterial = materials[DIAMOND_MATERIAL];
-                        Debug.Log("Tapped!");
                     }
 
                 }
@@ -197,7 +193,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
             foreach (Renderer renderer in renderers)
             {
                 renderer.sharedMaterial = materials[WAYPOINT_MATERIAL];
-                Debug.Log("Tapped!");
             }
             backFromDestNaming();
         }
@@ -226,6 +221,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                 ToastManager.ShowToast("SDK ยังไม่ถูกติดตั้ง", 2f);
                 return;
             }
+
+            shouldHit = false;
 
             LibPlacenote.Instance.SearchMaps(mapName, (LibPlacenote.MapInfo[] obj) =>
             {
@@ -351,8 +348,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         destNameText.text = "";
         mapNameText.text = "";
         LibPlacenote.Instance.StopSession ();
+        LibPlacenote.Instance.RemoveListener(this);
+        mSession.Pause();
         FeaturesVisualizer.clearPointcloud();
-        GetComponent<ShapeManager>().ClearShapes();
+        GetComponent<CustomShapeManager>().ClearShapes();
+        SceneManager.LoadScene("HomeCreate");
     }
 
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
@@ -374,10 +374,6 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         }
         else if (currStatus == LibPlacenote.MappingStatus.WAITING)
         {
-            if (GetComponent<CustomShapeManager>().shapeObjList.Count != 0)
-            {
-                GetComponent<CustomShapeManager>().ClearShapes();
-            }
         }
     }
 

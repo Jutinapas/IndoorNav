@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -18,9 +18,6 @@ public class Node : MonoBehaviour
     public float Cost { get; set; }
     public Node Parent { get; set; }
 
-    //next node in navigation list
-    public Node NextInList { get; set; }
-
     private Vector3 scale;
     private bool isDestination = false;
 
@@ -28,20 +25,36 @@ public class Node : MonoBehaviour
     {
         transform.GetChild(0).gameObject.SetActive(false);
         scale = transform.localScale;
-        if (GetComponent<TextMeshPro>() != null) isDestination = true;
+        if (transform.childCount > 1 && transform.GetChild(1).gameObject.GetComponent<TextMeshPro>() != null)
+        {
+            isDestination = true;
+        }
 
 #if UNITY_EDITOR
         pos = transform.position;
 #endif
     }
 
-    public void Activate(bool active)
+    public void Activate(Node nextNode)
     {
-        transform.GetChild(0).gameObject.SetActive(active);
-        if (NextInList != null)
+        transform.GetChild(0).gameObject.SetActive(true);
+        if (isDestination)
         {
-            transform.LookAt(NextInList.transform);
+            GetComponent<Rotate>().enabled = false;
+            transform.GetChild(1).gameObject.SetActive(false);
         }
+        transform.LookAt(nextNode.transform);
+    }
+
+    public void Deactivate()
+    {
+        transform.GetChild(0).gameObject.SetActive(false);
+        if (isDestination)
+        {
+            GetComponent<Rotate>().enabled = true;
+            transform.GetChild(1).gameObject.SetActive(true);
+        }
+        transform.rotation = new Quaternion(0, 0, 0, 0);
     }
 
     void Update()

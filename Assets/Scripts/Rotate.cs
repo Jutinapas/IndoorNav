@@ -8,4 +8,5 @@ public class Rotate : MonoBehaviour
     {
         transform.Rotate(0, 1, 0);
     }
+
 }

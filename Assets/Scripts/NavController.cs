@@ -30,7 +30,7 @@ public class NavController : MonoBehaviour
 
     IEnumerator DelayNavigation()
     {
-        while (FindObjectsOfType<TextMeshPro>().Count() != FindObjectOfType<CustomShapeManager>().numDest)
+        while (FindObjectsOfType<Rotate>().Count() != FindObjectOfType<CustomShapeManager>().numDest)
         {
             yield return new WaitForSeconds(.5f);
         }
@@ -46,10 +46,10 @@ public class NavController : MonoBehaviour
             Node closestNode = ReturnClosestNode(allNodes, transform.position);
             Debug.Log("Closest: " + closestNode.gameObject.name);
             
-            TextMeshPro[] dests = FindObjectsOfType<TextMeshPro>();
+            Rotate[] dests = FindObjectsOfType<Rotate>();
 
             Node target = null;
-            foreach (TextMeshPro dest in dests)
+            foreach (Rotate dest in dests)
             {
                 Node node = dest.gameObject.GetComponent<Node>();
                 if (node.id == id)
@@ -81,12 +81,13 @@ public class NavController : MonoBehaviour
                 return;
             }
 
+            Debug.Log("Number of Nodes in Path : " + path.Count);
+
             string str = ""; 
             for (int i = 0; i < path.Count - 1; i++)
             {
                 str += path[i].id + " >> ";
-                path[i].NextInList = path[i + 1];
-                path[i].Activate(true);
+                path[i].Activate(path[i + 1]);
             }
             Debug.Log(str);
 
@@ -127,8 +128,7 @@ public class NavController : MonoBehaviour
     {
         for (int i = 0; i < path.Count - 1; i++)
         {
-            path[i].NextInList = null;
-            path[i].Activate(false);
+            path[i].Deactivate();
         }
         path.Clear();
     }

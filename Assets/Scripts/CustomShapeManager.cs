@@ -121,7 +121,7 @@ public class CustomShapeManager : MonoBehaviour
             Destroy(selectedNode);
             shapeObjList.RemoveAt(index);
             GameObject gameObject = ShapeFromInfo(dest.info);
-            gameObject.GetComponent<TextMeshPro>().text = dest.name;
+            gameObject.transform.GetChild(1).gameObject.GetComponent<TextMeshPro>().text = dest.name;
             shapeObjList.Insert(index, gameObject);
 
             shapeList.RemoveAt(index);
@@ -173,10 +173,13 @@ public class CustomShapeManager : MonoBehaviour
             Destroy(shapeObjList[lastIndex]);
             shapeObjList.RemoveAt(lastIndex);
 
+            Debug.Log(numEdgeList[lastIndex]);
             for (int i = numEdgeList[lastIndex]; i > 0; i--)
             {
+                Debug.Log("Before: " + edgeObjList.Count);
                 Destroy(edgeObjList[edgeObjList.Count - 1]);
-                edgeObjList.RemoveAt(lastIndex);
+                edgeObjList.RemoveAt(edgeObjList.Count - 1);
+                Debug.Log("After: " + edgeObjList.Count);
             }
 
             numEdgeList.RemoveAt(lastIndex);
@@ -227,14 +230,13 @@ public class CustomShapeManager : MonoBehaviour
                 foreach (NodeShape shape in shapeList.shapes)
                 {
                     Debug.Log(shape.info.type);
-                    Debug.Log(new Vector3(shape.info.px, shape.info.py, shape.info.pz));
                     this.shapeList.Add(shape);
                     
                     GameObject shapeObj = ShapeFromJSON(shape.id, shape.info);
                     if (shape.info.type == TYPE_DEST.GetHashCode())
                     {
                         numDest += 1;
-                        shapeObj.GetComponent<TextMeshPro>().text = shape.name;
+                        shapeObj.transform.GetChild(1).gameObject.GetComponent<TextMeshPro>().text = shape.name;
                     }
                     this.shapeObjList.Add(shapeObj);
                 }

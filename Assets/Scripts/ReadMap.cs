@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using UnityEngine.SceneManagement;
 
 public class ReadMap : MonoBehaviour, PlacenoteListener
 {
@@ -201,7 +202,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         }
         navController.SetInitialized(false);
         navController.SetComplete(false);
-        navController.DeactivatePath();
         Debug.Log("Start Init");
         navController.InitNav(dest.id);
         destList.SetActive(false);
@@ -225,6 +225,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             else
             {
                 destList.SetActive(true);
+                navController.DeactivatePath();
                 navigationButton.GetComponentInChildren<Text>().text = "ย้อนกลับ";
             }
         }
@@ -236,8 +237,11 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         navigationButton.SetActive(false);
         mapList.SetActive(true);
         LibPlacenote.Instance.StopSession ();
+        LibPlacenote.Instance.RemoveListener(this);
+        mSession.Pause();
         FeaturesVisualizer.clearPointcloud();
-        GetComponent<ShapeManager>().ClearShapes();
+        GetComponent<CustomShapeManager>().ClearShapes();
+        SceneManager.LoadScene("HomeRead");
     }
 
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
@@ -263,10 +267,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         }
         else if (currStatus == LibPlacenote.MappingStatus.WAITING)
         {
-            if (GetComponent<CustomShapeManager>().shapeObjList.Count != 0)
-            {
-                GetComponent<CustomShapeManager>().ClearShapes();
-            }
         }
     }
 

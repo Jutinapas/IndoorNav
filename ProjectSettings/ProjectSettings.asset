@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: CNC
-  productName: Navigo
+  productName: Navigo+
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -159,7 +159,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    iPhone: cnc.jutinapas.csku.navigo
+    iPhone: cnc.jutinapas.csku.navigoplus
   buildNumber: {}
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 16
@@ -452,13 +452,13 @@ PlayerSettings:
       m_Kind: 3
       m_SubKind: iPad
     - m_Textures:
-      - {fileID: 2800000, guid: d06084253f0154a6598999a753d33e10, type: 3}
+      - {fileID: 2800000, guid: 0da8039e0dda14b2690a8e232d358918, type: 3}
       m_Width: 180
       m_Height: 180
       m_Kind: 0
       m_SubKind: iPhone
     - m_Textures:
-      - {fileID: 2800000, guid: 596ac4a5618764d8dad686aea52a5d11, type: 3}
+      - {fileID: 2800000, guid: 043d015f2a8124cf9b775ba7a72ab4fb, type: 3}
       m_Width: 120
       m_Height: 120
       m_Kind: 0

@@ -5,7 +5,8 @@ Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: waypoint
   m_Shader: {fileID: 4800000, guid: 0fc06dbae827e7646bd0850ff121daa5, type: 3}
   m_ShaderKeywords: _EMISSION _SPECULAR_SETUP
@@ -73,7 +74,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _MKGlowPower: 0.56
+    - _MKGlowPower: 0.15
     - _MKGlowTexStrength: 10
     - _Metallic: 0
     - _Mode: 0

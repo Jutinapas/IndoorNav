@@ -782,7 +782,7 @@ MonoBehaviour:
   destNameText: {fileID: 1924813865}
   mapNameText: {fileID: 627785916}
   mapping: {fileID: 822145072}
-  pathing: {fileID: 0}
+  pathing: {fileID: 1310308991}
   destNaming: {fileID: 577520296}
   mapNaming: {fileID: 1606601602}
   saving: {fileID: 739201087}
@@ -1004,7 +1004,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u0E48\u0E0A\u0E37\u0E48\u0E2D\u0E2A\u0E16\u0E32\u0E19\u0E17\u0E35\u0E48"
+  m_Text: "\u0E0A\u0E37\u0E48\u0E2D\u0E2A\u0E16\u0E32\u0E19\u0E17\u0E35\u0E48"
 --- !u!222 &229352541
 CanvasRenderer:
   m_ObjectHideFlags: 0

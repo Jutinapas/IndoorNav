@@ -121,7 +121,7 @@ public class CustomShapeManager : MonoBehaviour
             Destroy(selectedNode);
             shapeObjList.RemoveAt(index);
             GameObject gameObject = ShapeFromInfo(dest.info);
-            gameObject.transform.GetChild(1).gameObject.GetComponent<TextMeshPro>().text = dest.name;
+            gameObject.GetComponent<TextMeshPro>().text = dest.name;
             shapeObjList.Insert(index, gameObject);
 
             shapeList.RemoveAt(index);

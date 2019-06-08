@@ -9,41 +9,80 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using TMPro;
 
 [RequireComponent(typeof(CustomShapeManager))]
 public class CreateMap : MonoBehaviour, PlacenoteListener
 {
 
+    //Text
     public Text statusText;
     public Text destNameText;
     public Text mapNameText;
 
-    private string mapName;
-    private string destName;
+    //Button
+    public GameObject homeButton;
+
+    //GameObject
+    public GameObject processBar;
+    public GameObject process1;
+    public GameObject process2;
+    public GameObject process3;
+    public GameObject pathing;
+    public GameObject destNaming;
+    public GameObject mapNaming;
+    public GameObject saving;
+
+    //Button
+    public GameObject resetButton;
+    public GameObject toPathButton;
+    public GameObject toSaveButton;
+    public GameObject undoButton;
+    public GameObject startNodeButton;
+    public GameObject stopNodeButton;
+
+    //Alert
+    public GameObject resetAlert;
+    public GameObject toPathAlert;
+    public GameObject undoAlert;
+    public GameObject saveAlert;
+
+    private string mapName = "";
+    private string destName = "";
+    private enum Stage { START = 0, MAPPING = 1, PATHING = 2, SAVING = 3 };
+    private Stage currentStage = Stage.START;
 
     private CustomShapeManager shapeManager;
 
-    private bool dropNode = false;
+    private bool shouldDropNode = false;
     private bool shouldSaveMap = true;
-    private bool shouldHit = true;
+    private bool shouldHit = false;
 
     private UnityARSessionNativeInterface mSession;
     private bool mARKitInit = false;
 
     private LibPlacenote.MapMetadataSettable mCurrMapDetails;
 
-    public GameObject mapping;
-    public GameObject pathing;
-    public GameObject destNaming;
-    public GameObject mapNaming;
-    public GameObject saving;
-    public GameObject homeButton;
-
     private GameObject selectedNode;
     public Material[] materials;
 
     private const int WAYPOINT_MATERIAL = 0;
     private const int DIAMOND_MATERIAL = 1;
+
+    //Color
+    private Color32 GRAY_COLOR = new Color32(158, 158, 158, 255);
+    private Color32 ORANGE_COLOR = new Color32(255, 162, 47, 255);
+    private Color32 WHITE_COLOR = new Color32(255, 255, 255, 255);
+
+    private int fingerID = -1;
+
+    private void Awake()
+    {
+#if !UNITY_EDITOR
+        fingerID = 0; 
+#endif
+    }
 
     void Start()
     {
@@ -60,8 +99,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     private void StartARKit()
     {
-        statusText.text = "กำลังเตรียมพร้อม";
-        Debug.Log("กำลังเตรียมพร้อม");
+        statusText.text = "กำลังเริ่มทำงาน..";
         Application.targetFrameRate = 60;
         ConfigureSession();
     }
@@ -90,12 +128,10 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         if (!mARKitInit && LibPlacenote.Instance.Initialized())
         {
             mARKitInit = true;
-            statusText.text = "พร้อมสร้างแผนที่";
-            Debug.Log("พร้อมสร้างแผนที่");
             StartSavingMap();
         }
 
-        if (dropNode && mARKitInit)
+        if (shouldDropNode && mARKitInit)
         {
             Transform player = Camera.main.transform;
 
@@ -115,26 +151,33 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
             shapeManager.CreateWay(position);
         }
 
-        if (shouldHit && !dropNode && selectedNode == null && mARKitInit)
+        if (shouldHit && selectedNode == null && mARKitInit)
         {
-            if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
+            if (!EventSystem.current.IsPointerOverGameObject(fingerID) && Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
             {
                 Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
                 RaycastHit hit;
 
-                if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node" && hit.transform.name == "Waypoint(Clone)")
+                if (Physics.Raycast(ray, out hit) && hit.transform.tag == "Node")
                 {
                     shouldHit = false;
-                    mapping.SetActive(false);
+                    resetButton.SetActive(false);
+                    toSaveButton.SetActive(false);
+                    undoButton.SetActive(false);
+                    startNodeButton.SetActive(false);
                     destNaming.SetActive(true);
                     selectedNode = hit.transform.gameObject;
 
-                    Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
-                    foreach (Renderer renderer in renderers)
-                    {
-                        renderer.sharedMaterial = materials[DIAMOND_MATERIAL];
-                    }
+                    statusText.text = "ใส่ชื่อสถานที่";
 
+                    if (selectedNode.name == "Waypoint(Clone)")
+                    {
+                        selectedNode.transform.GetChild(0).gameObject.GetComponent<Renderer>().sharedMaterial = materials[DIAMOND_MATERIAL];
+                    }
+                    else if (selectedNode.name == "Place(Clone)")
+                    {
+                        destNameText.text = selectedNode.GetComponent<TextMeshPro>().text;
+                    }
                 }
             }
         }
@@ -144,35 +187,186 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     {
         if (!LibPlacenote.Instance.Initialized())
         {
-            statusText.text = "เกิดข้อผิดพลาด";
-            Debug.Log("เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง");
+            statusText.text = "เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง";
             return;
         }
 
-        statusText.text = "เริ่มสร้างแผนที่";
-        Debug.Log("เริ่มสร้างแผนที่");
+        statusText.text = "กวาดกล้องไปรอบ ๆ เพื่อสร้างแผนที่";
         LibPlacenote.Instance.StartSession();
+
+        currentStage = Stage.MAPPING;
+        processBar.SetActive(true);
+        resetButton.SetActive(true);
+        toPathButton.SetActive(true);
     }
 
+    //Reset Handle
+    public void OnResetClick()
+    {
+        //
+        if (currentStage == Stage.MAPPING)
+        {
+            toPathButton.SetActive(false);
+        }
+        else if (currentStage == Stage.PATHING)
+        {
+            toSaveButton.SetActive(false);
+            startNodeButton.SetActive(false);
+            undoButton.SetActive(false);
+            shouldHit = false;
+        }
+
+        statusText.text = "สร้างแผนที่ใหม่ ?";
+        resetAlert.SetActive(true);
+        resetButton.SetActive(false);
+    }
+
+    public void OnResetConfirmClick()
+    {
+        //
+        if (currentStage == Stage.MAPPING)
+        {
+            resetAlert.SetActive(false);
+        }
+        else if (currentStage == Stage.PATHING)
+        {
+            resetAlert.SetActive(false);
+            toSaveButton.SetActive(true);
+            startNodeButton.SetActive(true);
+            undoButton.SetActive(true);
+            pathing.SetActive(false);
+            shouldHit = false;
+        }
+        else if (currentStage == Stage.SAVING)
+        {
+            homeButton.SetActive(false);
+            saving.SetActive(false);
+        }
+
+        destName = "";
+        mapName = "";
+        destNameText.text = "";
+        mapNameText.text = "";
+
+        LibPlacenote.Instance.StopSession();
+        FeaturesVisualizer.clearPointcloud();
+        GetComponent<CustomShapeManager>().ClearShapes();
+        ConfigureSession();
+        mARKitInit = false;
+    }
+
+    public void OnResetCancelClick()
+    {
+        //
+        if (currentStage == Stage.MAPPING)
+        {
+            toPathButton.SetActive(true);
+            statusText.text = "กวาดกล้องไปรอบ ๆ เพื่อสร้างแผนที่";
+        }
+
+        resetAlert.SetActive(false);
+        resetButton.SetActive(true);
+    }
+
+    //ToPath Handle
     public void OnToPathClick()
     {
-        dropNode = true;
-        statusText.text = "เริ่มสร้างเส้นทาง";
-        Debug.Log("เริ่มสร้างเส้นทาง");
+        statusText.text = "เริ่มสร้างเส้นทาง ?";
+        resetButton.SetActive(false);
+        toPathButton.SetActive(false);
+        toPathAlert.SetActive(true);
     }
 
-    public void OnToMapClick()
+    public void OnToPathConfirmClick()
     {
-        dropNode = false;
-        statusText.text = "หยุดสร้างเส้นทาง";
-        Debug.Log("หยุดสร้างเส้นทาง");
+        statusText.text = "เริ่มสร้างเส้นทาง ?";
+        pathing.SetActive(true);
+        toSaveButton.SetActive(false);
+        toPathButton.SetActive(false);
+        toPathAlert.SetActive(false);
+        resetButton.SetActive(true);
+        shouldHit = true;
+        currentStage = Stage.PATHING;
+        process1.GetComponent<Image>().color = GRAY_COLOR;
+        process1.transform.localScale = new Vector3(1, 1, 1);
+        process2.GetComponent<Image>().color = ORANGE_COLOR;
+        process2.transform.localScale = new Vector3(1.175f, 1.175f, 1.175f);
+        process2.transform.SetAsLastSibling();
+        statusText.text = "วางโหนดและสร้างเส้นทาง";
     }
 
+    public void OnToPathCancelClick()
+    {
+        statusText.text = "กวาดกล้องไปรอบ ๆ เพื่อสร้างแผนที่";
+        resetButton.SetActive(true);
+        toPathButton.SetActive(true);
+        toPathAlert.SetActive(false);
+    }
+
+    //StartNode Handle
+    public void OnStartNodeClick()
+    {
+        resetButton.SetActive(false);
+        toSaveButton.SetActive(false);
+        undoButton.SetActive(false);
+        startNodeButton.SetActive(false);
+        stopNodeButton.SetActive(true);
+
+        shouldDropNode = true;
+        shouldHit = false;
+        statusText.text = "เดินไปรอบ ๆ เพื่อวางโหนด และสร้างเส้นทาง";
+    }
+
+    //StopNode Handle
+    public void OnStopCreateNodeClick()
+    {
+        resetButton.SetActive(true);
+        toSaveButton.SetActive(true);
+        undoButton.SetActive(true);
+        startNodeButton.SetActive(true);
+        stopNodeButton.SetActive(false);
+
+        shouldDropNode = false;
+        shouldHit = true;
+        statusText.text = "แตะที่โหนดเพื่อสร้างสถานที่";
+    }
+
+    //Undo Handle
     public void OnUndoClick()
     {
+        undoAlert.SetActive(true);
+        resetButton.SetActive(false);
+        toSaveButton.SetActive(false);
+        startNodeButton.SetActive(false);
+        undoButton.SetActive(false);
+
+        shouldHit = false;
+        statusText.text = "ลบโหนดล่าสุด ?";
+    }
+
+    public void OnUndoConfirmClick()
+    {
+        undoAlert.SetActive(false);
+        resetButton.SetActive(true);
+        toSaveButton.SetActive(true);
+        startNodeButton.SetActive(true);
+        undoButton.SetActive(true);
         shapeManager.UndoShape();
-        statusText.text = "ลบเส้นทาง";
-        Debug.Log("ลบเส้นทาง");
+
+        shouldHit = true;
+        statusText.text = "วางโหนดและสร้างเส้นทาง แตะที่โหนดเพื่อสร้างสถานที่";
+    }
+
+    public void OnUndoCancelClick()
+    {
+        undoAlert.SetActive(false);
+        resetButton.SetActive(true);
+        toSaveButton.SetActive(true);
+        startNodeButton.SetActive(true);
+        undoButton.SetActive(true);
+
+        shouldHit = true;
+        statusText.text = "วางโหนดและสร้างเส้นทาง แตะที่โหนดเพื่อสร้างสถานที่";
     }
 
     public void OnSaveDestClick()
@@ -189,10 +383,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     {
         if (selectedNode != null)
         {
-            Renderer[] renderers = selectedNode.GetComponentsInChildren<Renderer>();
-            foreach (Renderer renderer in renderers)
+            if (selectedNode.name == "Waypoint(Clone)")
             {
-                renderer.sharedMaterial = materials[WAYPOINT_MATERIAL];
+                selectedNode.transform.GetChild(0).gameObject.GetComponent<Renderer>().sharedMaterial = materials[WAYPOINT_MATERIAL];
             }
             backFromDestNaming();
         }
@@ -201,28 +394,73 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     private void backFromDestNaming()
     {
         destNameText.text = "";
+        Debug.Log(destNameText.text);
         selectedNode = null;
         destNaming.SetActive(false);
-        mapping.SetActive(true);
+        resetButton.SetActive(true);
+        toSaveButton.SetActive(true);
+        undoButton.SetActive(true);
+        startNodeButton.SetActive(true);
         shouldHit = true;
+        statusText.text = "วางโหนดและสร้างเส้นทาง แตะที่โหนดเพื่อสร้างสถานที่";
     }
 
-    public void OnSaveMapClick()
+    public void OnToSaveClick()
+    {
+        resetButton.SetActive(false);
+        toSaveButton.SetActive(false);
+        undoButton.SetActive(false);
+        startNodeButton.SetActive(false);
+
+        shouldHit = false;
+
+        mapNaming.SetActive(true);
+        statusText.text = "ใส่ชื่อสถานที่";
+    }
+
+    public void OnToSaveSaveClick()
+    {
+        mapName = mapNameText.text;
+        mapNameText.text = "";
+        mapNaming.SetActive(false);
+        saveAlert.SetActive(true);
+        saveAlert.transform.GetChild(2).GetComponent<Text>().text = "ชื่อแผนที่ : " + mapName;
+        saveAlert.transform.GetChild(3).GetComponent<Text>().text = "จำนวนสถานที่ : " + shapeManager.numDest;
+        statusText.text = "บันทึกแผนที่ " + mapName;
+    }
+
+    public void OnToSaveCancelClick()
+    {
+        mapName = "";
+        mapNaming.SetActive(false);
+        resetButton.SetActive(true);
+        toSaveButton.SetActive(true);
+        undoButton.SetActive(true);
+        startNodeButton.SetActive(true);
+
+        shouldHit = true;
+        statusText.text = "วางโหนดและสร้างเส้นทาง แตะที่โหนดเพื่อสร้างสถานที่";
+    }
+
+    public void OnSaveConfirmClick()
     {
         if (mapNameText.text != "")
         {
-
             mapName = mapNameText.text;
 
             if (!LibPlacenote.Instance.Initialized())
             {
                 statusText.text = "SDK ยังไม่ถูกติดตั้ง";
-                Debug.Log("SDK ยังไม่ถูกติดตั้ง");
-                ToastManager.ShowToast("SDK ยังไม่ถูกติดตั้ง", 2f);
                 return;
             }
 
-            shouldHit = false;
+            resetButton.SetActive(false);
+            toSaveButton.SetActive(false);
+            undoButton.SetActive(true);
+            startNodeButton.SetActive(true);
+            pathing.SetActive(false);
+
+            saving.SetActive(true);
 
             LibPlacenote.Instance.SearchMaps(mapName, (LibPlacenote.MapInfo[] obj) =>
             {
@@ -236,13 +474,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                         {
                             if (deleted)
                             {
-                                statusText.text = "ลบแผนที่ ID: " + map.placeId;
                                 Debug.Log("ลบแผนที่ ID: " + map.placeId);
                                 SaveCurrentMap();
                             }
                             else
                             {
-                                statusText.text = "ไม่สามารถลบแผนที่ ID: " + map.placeId;
                                 Debug.Log("ไม่สามารถลบแผนที่ ID: " + map.placeId);
                             }
                         });
@@ -256,9 +492,16 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         }
     }
 
-    public void OnCancelMapClick()
+    public void OnSaveCancelClick()
     {
-        mapNameText.text = "";
+        mapName = "";
+        resetButton.SetActive(true);
+        toSaveButton.SetActive(true);
+        undoButton.SetActive(true);
+        startNodeButton.SetActive(true);
+
+        shouldHit = true;
+        statusText.text = "วางโหนดและสร้างเส้นทาง แตะที่โหนดเพื่อสร้างสถานที่";
     }
 
     void SaveCurrentMap()
@@ -270,24 +513,25 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
             if (!LibPlacenote.Instance.Initialized())
             {
                 statusText.text = "SDK ยังไม่ถูกติดตั้ง";
-                Debug.Log("SDK ยังไม่ถูกติดตั้ง");
-                ToastManager.ShowToast("SDK ยังไม่ถูกติดตั้ง", 2f);
                 return;
             }
 
-            mapNameText.text = "";
-            mapNaming.SetActive(false);
-            saving.SetActive(true);
+            currentStage = Stage.SAVING;
+            process2.GetComponent<Image>().color = GRAY_COLOR;
+            process2.transform.localScale = new Vector3(1, 1, 1);
+            process3.GetComponent<Image>().color = ORANGE_COLOR;
+            process3.transform.localScale = new Vector3(1.175f, 1.175f, 1.175f);
+            process3.transform.SetAsLastSibling();
 
             bool useLocation = Input.location.status == LocationServiceStatus.Running;
             LocationInfo locationInfo = Input.location.lastData;
 
-            statusText.text = "กำลังอัพโหลด";
-            Debug.Log("กำลังอัพโหลด");
+            statusText.text = "กำลังอัพโหลด..";
             LibPlacenote.Instance.SaveMap(
                 (mapId) =>
                 {
                     LibPlacenote.Instance.StopSession();
+                    FeaturesVisualizer.clearPointcloud();
 
                     LibPlacenote.MapMetadataSettable metadata = new LibPlacenote.MapMetadataSettable();
                     metadata.name = mapName;
@@ -315,44 +559,21 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                 {
                     if (completed)
                     {
-                        Debug.Log("อัพโหลดเสร็จสิ้น: " + mCurrMapDetails.name);
                         statusText.text = "อัพโหลดเสร็จสิ้น";
                         homeButton.SetActive(true);
                     }
                     else if (faulted)
                     {
-                        Debug.Log("เกิดข้อผิดพลาด: " + mCurrMapDetails.name);
-                        statusText.text = "เกิดข้อผิดพลาด";
+                        statusText.text = "เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง";
                         homeButton.SetActive(true);
                     }
                     else
                     {
-                        Debug.Log("กำลังอัพโหลด: " + mCurrMapDetails.name + " " + ((int)(percentage * 100)).ToString() + "%");
                         statusText.text = "กำลังอัพโหลด " + ((int)(percentage * 100)).ToString() + "%";
                     }
                 }
             );
         }
-    }
-
-    public void OnExitButtonClick()
-    {
-        mapping.SetActive(true);
-        pathing.SetActive(false);
-        mapNaming.SetActive(false);
-        destNaming.SetActive(false);
-        saving.SetActive(false);
-        homeButton.SetActive(false);
-        destName = "";
-        mapName = "";
-        destNameText.text = "";
-        mapNameText.text = "";
-        LibPlacenote.Instance.StopSession ();
-        LibPlacenote.Instance.RemoveListener(this);
-        mSession.Pause();
-        FeaturesVisualizer.clearPointcloud();
-        GetComponent<CustomShapeManager>().ClearShapes();
-        SceneManager.LoadScene("HomeCreate");
     }
 
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }

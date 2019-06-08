@@ -104,30 +104,39 @@ public class CustomShapeManager : MonoBehaviour
         if (index >= 0)
         {
             NodeShape shape = shapeList[index];
-            NodeShapeInfo info = new NodeShapeInfo();
-            info.px = shape.info.px;
-            info.py = shape.info.py;
-            info.pz = shape.info.pz;
-            info.qx = 0;
-            info.qy = 0;
-            info.qz = 0;
-            info.qw = 0;
-            info.type = TYPE_DEST.GetHashCode();
-            NodeShape dest = new NodeShape();
-            dest.id = shape.id;
-            dest.name = destName;
-            dest.info = info;
+            if (selectedNode.name == "Place(Clone)")
+            {
+                shape.name = destName;
+                shapeList[index] = shape;
+                selectedNode.GetComponent<TextMeshPro>().text = destName;
+            }
+            else
+            {
+                NodeShapeInfo info = new NodeShapeInfo();
+                info.px = shape.info.px;
+                info.py = shape.info.py;
+                info.pz = shape.info.pz;
+                info.qx = 0;
+                info.qy = 0;
+                info.qz = 0;
+                info.qw = 0;
+                info.type = TYPE_DEST.GetHashCode();
+                NodeShape dest = new NodeShape();
+                dest.id = shape.id;
+                dest.name = destName;
+                dest.info = info;
 
-            Destroy(selectedNode);
-            shapeObjList.RemoveAt(index);
-            GameObject gameObject = ShapeFromInfo(dest.info);
-            gameObject.GetComponent<TextMeshPro>().text = dest.name;
-            shapeObjList.Insert(index, gameObject);
+                Destroy(selectedNode);
+                shapeObjList.RemoveAt(index);
+                GameObject gameObject = ShapeFromInfo(dest.info);
+                gameObject.transform.GetChild(0).GetComponent<TextMeshPro>().text = dest.name;
+                shapeObjList.Insert(index, gameObject);
 
-            shapeList.RemoveAt(index);
-            shapeList.Insert(index, dest);
-            Debug.Log((shapeList[index]).name);
-
+                shapeList.RemoveAt(index);
+                shapeList.Insert(index, dest);
+                Debug.Log((shapeList[index]).name);
+                numDest++;
+            }
         }
 
     }
@@ -150,11 +159,11 @@ public class CustomShapeManager : MonoBehaviour
         int type = info.type;
         GameObject shape = Instantiate(shapePrefabs[type]);
 
-        if (shape.GetComponent<Node> () != null) 
+        if (shape.GetComponent<Node>() != null)
         {
-            shape.GetComponent<Node> ().id = id;
-			shape.GetComponent<Node> ().pos = position;
-		}
+            shape.GetComponent<Node>().id = id;
+            shape.GetComponent<Node>().pos = position;
+        }
 
         shape.transform.position = position;
         shape.transform.rotation = new Quaternion(info.qx, info.qy, info.qz, info.qw);
@@ -168,6 +177,10 @@ public class CustomShapeManager : MonoBehaviour
         if (shapeList.Count > 0)
         {
             int lastIndex = shapeList.Count - 1;
+            if (shapeList[lastIndex].info.type == TYPE_DEST.GetHashCode())
+            {
+                numDest--;
+            }
             shapeList.RemoveAt(lastIndex);
 
             Destroy(shapeObjList[lastIndex]);
@@ -208,6 +221,7 @@ public class CustomShapeManager : MonoBehaviour
         }
         shapeObjList.Clear();
         shapeList.Clear();
+        numDest = 0;
     }
 
     public void LoadShapesJSON(JToken mapMetadata)
@@ -231,7 +245,7 @@ public class CustomShapeManager : MonoBehaviour
                 {
                     Debug.Log(shape.info.type);
                     this.shapeList.Add(shape);
-                    
+
                     GameObject shapeObj = ShapeFromJSON(shape.id, shape.info);
                     if (shape.info.type == TYPE_DEST.GetHashCode())
                     {

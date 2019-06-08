@@ -8,6 +8,7 @@ TagManager:
   - Waypoint
   - Edge
   - Node
+  - Button
   layers:
   - Default
   - TransparentFX

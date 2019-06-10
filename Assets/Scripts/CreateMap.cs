@@ -17,36 +17,36 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 {
 
     //Text
-    public Text statusText;
-    public Text destNameText;
-    public Text mapNameText;
+    [SerializeField] Text statusText;
 
-    //Button
-    public GameObject homeButton;
+    //InputField
+    [SerializeField] InputField destNameField;
+    [SerializeField] InputField mapNameField;
 
     //GameObject
-    public GameObject processBar;
-    public GameObject process1;
-    public GameObject process2;
-    public GameObject process3;
-    public GameObject pathing;
-    public GameObject destNaming;
-    public GameObject mapNaming;
-    public GameObject saving;
+    [SerializeField] GameObject processBar;
+    [SerializeField] GameObject process1;
+    [SerializeField] GameObject process2;
+    [SerializeField] GameObject process3;
+    [SerializeField] GameObject pathing;
+    [SerializeField] GameObject destNaming;
+    [SerializeField] GameObject mapNaming;
+    [SerializeField] GameObject saving;
 
     //Button
-    public GameObject resetButton;
-    public GameObject toPathButton;
-    public GameObject toSaveButton;
-    public GameObject undoButton;
-    public GameObject startNodeButton;
-    public GameObject stopNodeButton;
+    [SerializeField] GameObject resetButton;
+    [SerializeField] GameObject toPathButton;
+    [SerializeField] GameObject toSaveButton;
+    [SerializeField] GameObject undoButton;
+    [SerializeField] GameObject startNodeButton;
+    [SerializeField] GameObject stopNodeButton;
+    [SerializeField] GameObject homeButton;
 
     //Alert
-    public GameObject resetAlert;
-    public GameObject toPathAlert;
-    public GameObject undoAlert;
-    public GameObject saveAlert;
+    [SerializeField] GameObject resetAlert;
+    [SerializeField] GameObject toPathAlert;
+    [SerializeField] GameObject undoAlert;
+    [SerializeField] GameObject saveAlert;
 
     private string mapName = "";
     private string destName = "";
@@ -119,6 +119,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 		config.getPointCloudData = true;
 		config.enableLightEstimation = true;
 		mSession.RunWithConfig (config);
+        currentStage = Stage.START;
 #endif
     }
 
@@ -174,9 +175,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     {
                         selectedNode.transform.GetChild(0).gameObject.GetComponent<Renderer>().sharedMaterial = materials[DIAMOND_MATERIAL];
                     }
-                    else if (selectedNode.name == "Place(Clone)")
+                    else if (selectedNode.name == "Destination(Clone)")
                     {
-                        destNameText.text = selectedNode.GetComponent<TextMeshPro>().text;
+                        destNameField.text = selectedNode.transform.GetChild(0).GetComponent<TextMeshPro>().text;
                     }
                 }
             }
@@ -231,22 +232,33 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         else if (currentStage == Stage.PATHING)
         {
             resetAlert.SetActive(false);
-            toSaveButton.SetActive(true);
             startNodeButton.SetActive(true);
             undoButton.SetActive(true);
             pathing.SetActive(false);
             shouldHit = false;
+            process1.GetComponent<Image>().color = ORANGE_COLOR;
+            process1.transform.localScale = new Vector3(1.175f, 1.175f, 1.175f);
+            process2.GetComponent<Image>().color = WHITE_COLOR;
+            process2.transform.localScale = new Vector3(1, 1, 1);
+            process1.transform.SetAsLastSibling();
         }
         else if (currentStage == Stage.SAVING)
         {
             homeButton.SetActive(false);
             saving.SetActive(false);
+            process1.GetComponent<Image>().color = ORANGE_COLOR;
+            process1.transform.localScale = new Vector3(1.175f, 1.175f, 1.175f);
+            process2.GetComponent<Image>().color = WHITE_COLOR;
+            process2.transform.localScale = new Vector3(1, 1, 1);
+            process3.GetComponent<Image>().color = WHITE_COLOR;
+            process3.transform.localScale = new Vector3(1, 1, 1);
+            process1.transform.SetAsLastSibling();
         }
 
         destName = "";
         mapName = "";
-        destNameText.text = "";
-        mapNameText.text = "";
+        destNameField.text = "";
+        mapNameField.text = "";
 
         LibPlacenote.Instance.StopSession();
         FeaturesVisualizer.clearPointcloud();
@@ -262,6 +274,14 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         {
             toPathButton.SetActive(true);
             statusText.text = "กวาดกล้องไปรอบ ๆ เพื่อสร้างแผนที่";
+        }
+        else if (currentStage == Stage.PATHING)
+        {
+            toSaveButton.SetActive(true);
+            startNodeButton.SetActive(true);
+            undoButton.SetActive(true);
+            shouldHit = true;
+            statusText.text = "วางโหนดและสร้างเส้นทาง แตะที่โหนดเพื่อสร้างสถานที่";
         }
 
         resetAlert.SetActive(false);
@@ -292,7 +312,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         process2.GetComponent<Image>().color = ORANGE_COLOR;
         process2.transform.localScale = new Vector3(1.175f, 1.175f, 1.175f);
         process2.transform.SetAsLastSibling();
-        statusText.text = "วางโหนดและสร้างเส้นทาง";
+        statusText.text = "วางโหนดเพื่อสร้างเส้นทาง";
     }
 
     public void OnToPathCancelClick()
@@ -371,9 +391,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     public void OnSaveDestClick()
     {
-        if (destNameText.text != "" && selectedNode != null)
+        if (destNameField.text != "" && selectedNode != null)
         {
-            destName = destNameText.text;
+            destName = destNameField.text;
             shapeManager.CreateDest(selectedNode, destName);
             backFromDestNaming();
         }
@@ -393,8 +413,8 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     private void backFromDestNaming()
     {
-        destNameText.text = "";
-        Debug.Log(destNameText.text);
+        destNameField.text = "";
+        Debug.Log(destNameField.text);
         selectedNode = null;
         destNaming.SetActive(false);
         resetButton.SetActive(true);
@@ -420,8 +440,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     public void OnToSaveSaveClick()
     {
-        mapName = mapNameText.text;
-        mapNameText.text = "";
+        mapName = mapNameField.text;
         mapNaming.SetActive(false);
         saveAlert.SetActive(true);
         saveAlert.transform.GetChild(2).GetComponent<Text>().text = "ชื่อแผนที่ : " + mapName;
@@ -432,6 +451,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     public void OnToSaveCancelClick()
     {
         mapName = "";
+        mapNameField.text = "";
         mapNaming.SetActive(false);
         resetButton.SetActive(true);
         toSaveButton.SetActive(true);
@@ -444,9 +464,9 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     public void OnSaveConfirmClick()
     {
-        if (mapNameText.text != "")
+        if (mapNameField.text != "")
         {
-            mapName = mapNameText.text;
+            mapName = mapNameField.text;
 
             if (!LibPlacenote.Instance.Initialized())
             {
@@ -456,6 +476,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
             resetButton.SetActive(false);
             toSaveButton.SetActive(false);
+            saveAlert.SetActive(false);
             undoButton.SetActive(true);
             startNodeButton.SetActive(true);
             pathing.SetActive(false);
@@ -495,10 +516,12 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     public void OnSaveCancelClick()
     {
         mapName = "";
+        mapNameField.text = "";
         resetButton.SetActive(true);
         toSaveButton.SetActive(true);
         undoButton.SetActive(true);
         startNodeButton.SetActive(true);
+        saveAlert.SetActive(false);
 
         shouldHit = true;
         statusText.text = "วางโหนดและสร้างเส้นทาง แตะที่โหนดเพื่อสร้างสถานที่";

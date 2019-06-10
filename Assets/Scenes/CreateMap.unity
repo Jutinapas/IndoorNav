@@ -642,7 +642,6 @@ RectTransform:
   - {fileID: 1386063109}
   - {fileID: 1310308992}
   - {fileID: 739201088}
-  - {fileID: 1719386389}
   m_Father: {fileID: 1743309243}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -733,9 +732,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   statusText: {fileID: 2034178836}
-  destNameText: {fileID: 1924813865}
-  mapNameText: {fileID: 627785916}
-  homeButton: {fileID: 1424009877}
+  destNameField: {fileID: 164843826}
+  mapNameField: {fileID: 22882541}
   processBar: {fileID: 166999258}
   process1: {fileID: 1887959194}
   process2: {fileID: 1053260490}
@@ -750,6 +748,7 @@ MonoBehaviour:
   undoButton: {fileID: 1268125203}
   startNodeButton: {fileID: 55087605}
   stopNodeButton: {fileID: 923769451}
+  homeButton: {fileID: 1424009877}
   resetAlert: {fileID: 1187504353}
   toPathAlert: {fileID: 1800999423}
   undoAlert: {fileID: 1824011771}
@@ -1161,7 +1160,6 @@ GameObject:
   - component: {fileID: 427861860}
   - component: {fileID: 427861862}
   - component: {fileID: 427861861}
-  - component: {fileID: 427861863}
   m_Layer: 5
   m_Name: SaveAlertBox
   m_TagString: Untagged
@@ -1230,19 +1228,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 427861859}
   m_CullTransparentMesh: 0
---- !u!65 &427861863
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 427861859}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 350, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &461375160
 GameObject:
   m_ObjectHideFlags: 0
@@ -1622,7 +1607,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 577520297}
-  - component: {fileID: 577520298}
   - component: {fileID: 577520299}
   m_Layer: 5
   m_Name: "Dest\u0E4CNaming"
@@ -1654,19 +1638,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!65 &577520298
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 577520296}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 100, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &577520299
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1826,10 +1797,11 @@ MonoBehaviour:
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
-  m_Text: "\u0E04\u0E38\u0E13\u0E08\u0E33\u0E40\u0E1B\u0E47\u0E19\u0E15\u0E49\u0E2D\u0E07\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E41\u0E1C\u0E19\u0E17\u0E35\u0E48\u0E43\u0E19\u0E1A\u0E23\u0E34\u0E40\u0E27\u0E13\n\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E40\u0E2A\u0E49\u0E19\u0E17\u0E32\u0E07\u0E43\u0E2B\u0E49\u0E04\u0E23\u0E2D\u0E1A\u0E04\u0E25\u0E38\u0E21\u0E01\u0E48\u0E2D\u0E19"
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1.5
+  m_Text: "\u0E04\u0E38\u0E13\u0E08\u0E33\u0E40\u0E1B\u0E47\u0E19\u0E15\u0E49\u0E2D\u0E07\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E41\u0E1C\u0E19\u0E17\u0E35\u0E48\u0E43\u0E2B\u0E49\u0E04\u0E23\u0E2D\u0E1A\u0E04\u0E25\u0E38\u0E21
+    \u0E21\u0E35\u0E08\u0E38\u0E14\u0E2A\u0E35\u0E40\u0E02\u0E35\u0E22\u0E27\u0E2B\u0E19\u0E32\u0E41\u0E19\u0E48\u0E19\u0E2D\u0E22\u0E39\u0E48\u0E17\u0E31\u0E48\u0E27\u0E1A\u0E23\u0E34\u0E40\u0E27\u0E13\u0E01\u0E48\u0E2D\u0E19"
 --- !u!222 &619785154
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1847,7 +1819,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 624820738}
-  - component: {fileID: 624820739}
   m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
@@ -1874,19 +1845,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -75}
   m_SizeDelta: {x: 728, y: 150}
   m_Pivot: {x: 0.5, y: 0}
---- !u!65 &624820739
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 624820737}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 150, z: 1}
-  m_Center: {x: 0, y: 75, z: 0}
 --- !u!1 &627785914
 GameObject:
   m_ObjectHideFlags: 0
@@ -3143,9 +3101,9 @@ MonoBehaviour:
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1.5
   m_Text: "\u0E42\u0E2B\u0E19\u0E14\u0E25\u0E48\u0E32\u0E2A\u0E38\u0E14\u0E17\u0E35\u0E48\u0E04\u0E38\u0E13\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E44\u0E27\u0E49\u0E1A\u0E19\u0E40\u0E2A\u0E49\u0E19\u0E17\u0E32\u0E07\u0E08\u0E30\u0E16\u0E39\u0E01\u0E25\u0E1A"
 --- !u!222 &1058449538
 CanvasRenderer:
@@ -3225,7 +3183,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u0E15\u0E49\u0E2D\u0E07\u0E40\u0E23\u0E34\u0E48\u0E21\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E41\u0E1C\u0E19\u0E17\u0E35\u0E48\u0E43\u0E2B\u0E21\u0E48\u0E43\u0E0A\u0E48\u0E44\u0E2B\u0E21
+  m_Text: "\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E40\u0E23\u0E34\u0E48\u0E21\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E41\u0E1C\u0E19\u0E17\u0E35\u0E48\u0E43\u0E2B\u0E21\u0E48\u0E43\u0E0A\u0E48\u0E44\u0E2B\u0E21
     ?"
 --- !u!222 &1073704263
 CanvasRenderer:
@@ -3485,7 +3443,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1123862756}
-  - component: {fileID: 1123862757}
   m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
@@ -3512,19 +3469,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -75}
   m_SizeDelta: {x: 728, y: 150}
   m_Pivot: {x: 0.5, y: 0}
---- !u!65 &1123862757
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1123862755}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 150, z: 1}
-  m_Center: {x: 0, y: 75, z: 0}
 --- !u!1 &1187504353
 GameObject:
   m_ObjectHideFlags: 0
@@ -3536,7 +3480,6 @@ GameObject:
   - component: {fileID: 1187504354}
   - component: {fileID: 1187504356}
   - component: {fileID: 1187504355}
-  - component: {fileID: 1187504357}
   m_Layer: 5
   m_Name: ResetAlertBox
   m_TagString: Untagged
@@ -3604,19 +3547,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1187504353}
   m_CullTransparentMesh: 0
---- !u!65 &1187504357
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1187504353}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 350, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1192344192
 GameObject:
   m_ObjectHideFlags: 0
@@ -4240,7 +4170,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1310308992
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4581,7 +4511,6 @@ GameObject:
   - component: {fileID: 1386063109}
   - component: {fileID: 1386063111}
   - component: {fileID: 1386063110}
-  - component: {fileID: 1386063112}
   m_Layer: 5
   m_Name: NavBar
   m_TagString: Untagged
@@ -4652,19 +4581,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1386063108}
   m_CullTransparentMesh: 0
---- !u!65 &1386063112
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1386063108}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 225, z: 1}
-  m_Center: {x: 0, y: -125, z: 0}
 --- !u!1 &1418073931
 GameObject:
   m_ObjectHideFlags: 0
@@ -4996,9 +4912,9 @@ MonoBehaviour:
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1.5
   m_Text: "\u0E41\u0E1C\u0E19\u0E17\u0E35\u0E48\u0E41\u0E25\u0E30\u0E40\u0E2A\u0E49\u0E19\u0E17\u0E32\u0E07\u0E17\u0E35\u0E48\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E2D\u0E22\u0E39\u0E48\u0E08\u0E30\u0E16\u0E39\u0E01\u0E25\u0E1A\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14"
 --- !u!222 &1567152594
 CanvasRenderer:
@@ -5187,7 +5103,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1606601603}
-  - component: {fileID: 1606601604}
   m_Layer: 5
   m_Name: MapNaming
   m_TagString: Untagged
@@ -5218,19 +5133,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!65 &1606601604
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1606601602}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 100, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1650755550
 GameObject:
   m_ObjectHideFlags: 0
@@ -5370,7 +5272,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 28
+    m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -5378,9 +5280,9 @@ MonoBehaviour:
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1.5
   m_Text: "\u0E0A\u0E37\u0E48\u0E2D\u0E41\u0E1C\u0E19\u0E17\u0E35\u0E48 : "
 --- !u!222 &1676312442
 CanvasRenderer:
@@ -5390,91 +5292,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1676312439}
   m_CullTransparentMesh: 0
---- !u!1 &1719386388
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1719386389}
-  m_Layer: 5
-  m_Name: Colliders
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1719386389
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1719386388}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1729967595}
-  m_Father: {fileID: 101716591}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1729967594
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1729967595}
-  - component: {fileID: 1729967596}
-  m_Layer: 5
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1729967595
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1729967594}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1719386389}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: -761}
-  m_SizeDelta: {x: 728, y: 150}
-  m_Pivot: {x: 0.5, y: 0}
---- !u!65 &1729967596
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1729967594}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 150, z: 1}
-  m_Center: {x: 0, y: 75, z: 0}
 --- !u!1 &1737830263
 GameObject:
   m_ObjectHideFlags: 0
@@ -5910,7 +5727,6 @@ GameObject:
   - component: {fileID: 1800999424}
   - component: {fileID: 1800999426}
   - component: {fileID: 1800999425}
-  - component: {fileID: 1800999427}
   m_Layer: 5
   m_Name: ToPathAlertBox
   m_TagString: Untagged
@@ -5978,19 +5794,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1800999423}
   m_CullTransparentMesh: 0
---- !u!65 &1800999427
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1800999423}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 350, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1809684110
 GameObject:
   m_ObjectHideFlags: 0
@@ -6081,7 +5884,6 @@ GameObject:
   - component: {fileID: 1824011774}
   - component: {fileID: 1824011773}
   - component: {fileID: 1824011772}
-  - component: {fileID: 1824011775}
   m_Layer: 5
   m_Name: UndoAlertBox
   m_TagString: Untagged
@@ -6149,19 +5951,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 610, y: 350}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!65 &1824011775
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1824011771}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 850, y: 350, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1871968333
 GameObject:
   m_ObjectHideFlags: 0
@@ -7122,9 +6911,9 @@ MonoBehaviour:
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
-    m_LineSpacing: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1.5
   m_Text: "\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A\u0E16\u0E32\u0E19\u0E17\u0E35\u0E48
     :   "
 --- !u!222 &2024977810
@@ -7185,7 +6974,7 @@ MonoBehaviour:
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 1
+    m_LineSpacing: 1.25
   m_Text: 
 --- !u!222 &2034178837
 CanvasRenderer:

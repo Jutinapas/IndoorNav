@@ -13,21 +13,23 @@ using UnityEngine.SceneManagement;
 public class ReadMap : MonoBehaviour, PlacenoteListener
 {
 
-    private const string MAP_NAME = "GenericMap";
-    public NavController navController;
+    [SerializeField] NavController navController;
 
+    //GameObject
     [SerializeField] GameObject mListElement;
+    [SerializeField] GameObject dListElement;
+    [SerializeField] GameObject mapList;
+    [SerializeField] GameObject destList;
+    [SerializeField] GameObject navigationButton;
+    [SerializeField] GameObject resetButton;
+    [SerializeField] GameObject resetAlert;
+
     [SerializeField] RectTransform mListContentParent;
     [SerializeField] ToggleGroup mToggleGroup;
-
-    [SerializeField] GameObject dListElement;
     [SerializeField] RectTransform dListContentParent;
     [SerializeField] ToggleGroup dToggleGroup;
 
     [SerializeField] Text statusText;
-    [SerializeField] GameObject mapList;
-    [SerializeField] GameObject destList;
-    [SerializeField] GameObject navigationButton;
 
     private bool mapListUpdated = false;
     private bool destListUpdated = false;
@@ -35,8 +37,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     private UnityARSessionNativeInterface mSession;
     private bool mARKitInit = false;
-
-    private LibPlacenote.MapMetadataSettable mCurrMapDetails;
 
     private LibPlacenote.MapInfo mSelectedMapInfo;
     private string mSelectedMapId
@@ -47,10 +47,12 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         }
     }
 
+    private enum Stage { START = 0, NAVI = 1};
+    private Stage currentStage = Stage.START;
+
     void Start()
     {
         Input.location.Start();
-
         mSession = UnityARSessionNativeInterface.GetARSessionNativeInterface();
         StartARKit();
         FeaturesVisualizer.EnablePointcloud();
@@ -59,12 +61,11 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
     private void StartARKit()
     {
-        Debug.Log("Initializing ARKit");
         Application.targetFrameRate = 60;
-        ConfigureSession(false);
+        ConfigureSession();
     }
 
-    private void ConfigureSession(bool clearPlanes)
+    private void ConfigureSession()
     {
 #if !UNITY_EDITOR
 		ARKitWorldTrackingSessionConfiguration config = new ARKitWorldTrackingSessionConfiguration ();
@@ -73,6 +74,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 		config.getPointCloudData = true;
 		config.enableLightEstimation = true;
 		mSession.RunWithConfig (config);
+        currentStage = Stage.START;
 #endif
     }
 
@@ -81,7 +83,6 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
 
         if (!LibPlacenote.Instance.Initialized())
         {
-            Debug.Log("SDK ยังไม่ถูกติดตั้ง");
             statusText.text = "SDK ยังไม่ถูกติดตั้ง";
             return;
         }
@@ -94,8 +95,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         if (!mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
         {
             mARKitInit = true;
-            Debug.Log("กำลังดาวน์โหลด");
-            statusText.text = "กำลังดาวน์โหลด";
+            statusText.text = "กำลังดาวน์โหลด.." ;
 
             LibPlacenote.Instance.LoadMap(mSelectedMapId,
                 (completed, faulted, percentage) =>
@@ -104,12 +104,13 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
                     {
                         LibPlacenote.Instance.StartSession();
                         Debug.Log("Starting Session " + mSelectedMapId);
-                        statusText.text = "เริ่มค้นหาตำแหน่ง";
+                        statusText.text = "เริ่มค้นหาตำแหน่งใน " + mSelectedMapInfo.metadata.name;
+                        currentStage = Stage.NAVI;
                     }
                     else if (faulted)
                     {
                         Debug.Log("Failed to Load " + mSelectedMapId);
-                        statusText.text = "ไม่สามารถดาวน์โหลดได้";
+                        statusText.text = "ไม่สามารถดาวน์โหลดได้ ลองใหม่อีกครั้ง";
                     }
                     else
                     {
@@ -144,8 +145,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         });
 
         mapListUpdated = true;
-        Debug.Log("Select Map in List");
-        statusText.text = "เลือกแผนที่ที่ต้องการ";
+        statusText.text = "เลือกแผนที่";
     }
 
     void AddMapToList(LibPlacenote.MapInfo mapInfo)
@@ -174,13 +174,10 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         {
             if (shape.info.type == 1.GetHashCode())
             {
-                Debug.Log("Add " + shape.name);
                 AddDestToList(shape);
             }
         }
-
-        Debug.Log("Select Dest in List");
-        statusText.text = "เลือกสถานที่ที่ต้องการ";
+        statusText.text = "เลือกสถานที่เพื่อเริ่มนำทาง";
     }
 
     void AddDestToList(NodeShape dest)
@@ -202,15 +199,18 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         }
         navController.SetInitialized(false);
         navController.SetComplete(false);
-        Debug.Log("Start Init");
         navController.InitNav(dest.id);
         destList.SetActive(false);
+        resetButton.SetActive(true);
+        navigationButton.GetComponentInChildren<Text>().text = "เลือกสถานที่";
+        statusText.text = "นำทางไปยัง " + dest.name;
     }
 
     public void OnNavButtonClick()
     {
         if (!destListUpdated)
         {
+            resetButton.SetActive(false);
             destList.SetActive(true);
             GetListDests();
             destListUpdated = true;
@@ -219,29 +219,74 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         {
             if (destList.activeSelf)
             {
+                resetButton.SetActive(true);
                 destList.SetActive(false);
                 navigationButton.GetComponentInChildren<Text>().text = "เลือกสถานที่";
+                statusText.text = "เลือกสถานที่เพื่อเริ่มนำทาง";
             }
             else
             {
+                resetButton.SetActive(false);
                 destList.SetActive(true);
                 navController.DeactivatePath();
                 navigationButton.GetComponentInChildren<Text>().text = "ย้อนกลับ";
+                statusText.text = "เลือกสถานที่เพื่อเริ่มนำทาง";
             }
         }
     }
 
-    public void OnExitButtonClick()
+    public void OnResetButtonClick()
     {
-        destList.SetActive(false);
-        navigationButton.SetActive(false);
+        resetButton.SetActive(false);
+        resetAlert.SetActive(true);
+        if (currentStage == Stage.START)
+        {
+            mapList.SetActive(false);
+        }
+        else if (currentStage == Stage.NAVI)
+        {
+            navigationButton.SetActive(false);
+        }
+        statusText.text = "ต้องการเลือกแผนที่ใหม่ใช่ไหม ?";
+    }
+
+    public void OnResetConfirmClick()
+    {
+        resetButton.SetActive(true);
+        resetAlert.SetActive(false);
+
+        if (currentStage == Stage.NAVI)
+        {
+            navigationButton.SetActive(false);
+        }
+        statusText.text = "เลือกแผนที่";
+
         mapList.SetActive(true);
-        LibPlacenote.Instance.StopSession ();
-        LibPlacenote.Instance.RemoveListener(this);
-        mSession.Pause();
+        LibPlacenote.Instance.StopSession();
         FeaturesVisualizer.clearPointcloud();
         GetComponent<CustomShapeManager>().ClearShapes();
-        SceneManager.LoadScene("HomeRead");
+        ConfigureSession();
+        mARKitInit = false;
+        mapListUpdated = false;
+        destListUpdated = false;
+        isLocalize = false;
+        mSelectedMapInfo = null;
+    }
+
+    public void OnResetCancelClick()
+    {
+        resetButton.SetActive(true);
+        resetAlert.SetActive(false);
+        if (currentStage == Stage.START)
+        {
+            mapList.SetActive(true);
+            statusText.text = "เลือกแผนที่";
+        }
+        else if (currentStage == Stage.NAVI)
+        {
+            navigationButton.SetActive(true);
+            statusText.text = "เลือกสถานที่เพื่อเริ่มนำทาง";
+        }
     }
 
     public void OnPose(Matrix4x4 outputPose, Matrix4x4 arkitPose) { }
@@ -253,7 +298,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
             if (!isLocalize)
             {
                 isLocalize = true;
-                statusText.text = "ระบุตำแหน่งสำเร็จ";
+                statusText.text = "เลือกสถานที่ใน " + mSelectedMapInfo.metadata.name;
                 FeaturesVisualizer.DisablePointcloud();
                 GetComponent<CustomShapeManager>().LoadShapesJSON(mSelectedMapInfo.metadata.userdata);
                 navigationButton.SetActive(true);

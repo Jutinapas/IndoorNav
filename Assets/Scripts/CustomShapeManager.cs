@@ -34,18 +34,12 @@ public class NodeShapeList
 
 public class CustomShapeManager : MonoBehaviour
 {
-    public List<GameObject> shapePrefabs = new List<GameObject>();
+    [SerializeField] List<GameObject> shapePrefabs = new List<GameObject>();
 
-    [HideInInspector]
-    public List<GameObject> shapeObjList = new List<GameObject>();
-    [HideInInspector]
-    public List<GameObject> edgeObjList = new List<GameObject>();
-    [HideInInspector]
-    public List<int> numEdgeList = new List<int>();
-    [HideInInspector]
-    public List<NodeShape> shapeList = new List<NodeShape>();
-
-    private bool shapesLoaded = false;
+    [HideInInspector] public List<GameObject> shapeObjList = new List<GameObject>();
+    [HideInInspector] public List<GameObject> edgeObjList = new List<GameObject>();
+    [HideInInspector] public List<int> numEdgeList = new List<int>();
+    [HideInInspector] public List<NodeShape> shapeList = new List<NodeShape>();
 
     [HideInInspector] public int numDest = 0;
 
@@ -104,11 +98,11 @@ public class CustomShapeManager : MonoBehaviour
         if (index >= 0)
         {
             NodeShape shape = shapeList[index];
-            if (selectedNode.name == "Place(Clone)")
+            if (selectedNode.name == "Destination(Clone)")
             {
                 shape.name = destName;
                 shapeList[index] = shape;
-                selectedNode.GetComponent<TextMeshPro>().text = destName;
+                selectedNode.transform.GetChild(0).GetComponent<TextMeshPro>().text = destName;
             }
             else
             {
@@ -215,45 +209,49 @@ public class CustomShapeManager : MonoBehaviour
     public void ClearShapes()
     {
         Debug.Log("Clearing Shapes");
-        foreach (GameObject obj in shapeObjList)
+        foreach (GameObject shape in shapeObjList)
         {
-            Destroy(obj);
+            Destroy(shape);
         }
         shapeObjList.Clear();
         shapeList.Clear();
         numDest = 0;
+
+        foreach (GameObject edge in edgeObjList)
+        {
+            Destroy(edge);
+        }
+        edgeObjList.Clear();
+        numEdgeList.Clear();
     }
 
     public void LoadShapesJSON(JToken mapMetadata)
     {
-        if (!shapesLoaded)
+
+        Debug.Log("Loading shapes");
+        Debug.Log(mapMetadata is JObject);
+        Debug.Log(mapMetadata["data"] is JObject);
+        if (mapMetadata is JObject && mapMetadata["data"] is JObject)
         {
-            shapesLoaded = true;
-            Debug.Log("Loading shapes");
-            Debug.Log(mapMetadata is JObject);
-            Debug.Log(mapMetadata["data"] is JObject);
-            if (mapMetadata is JObject && mapMetadata["data"] is JObject)
+            NodeShapeList shapeList = mapMetadata["data"].ToObject<NodeShapeList>();
+            if (shapeList.shapes == null)
             {
-                NodeShapeList shapeList = mapMetadata["data"].ToObject<NodeShapeList>();
-                if (shapeList.shapes == null)
-                {
-                    Debug.Log("No shapes dropped");
-                    return;
-                }
+                Debug.Log("No shapes dropped");
+                return;
+            }
 
-                foreach (NodeShape shape in shapeList.shapes)
-                {
-                    Debug.Log(shape.info.type);
-                    this.shapeList.Add(shape);
+            foreach (NodeShape shape in shapeList.shapes)
+            {
+                Debug.Log(shape.info.type);
+                this.shapeList.Add(shape);
 
-                    GameObject shapeObj = ShapeFromJSON(shape.id, shape.info);
-                    if (shape.info.type == TYPE_DEST.GetHashCode())
-                    {
-                        numDest += 1;
-                        shapeObj.transform.GetChild(1).gameObject.GetComponent<TextMeshPro>().text = shape.name;
-                    }
-                    this.shapeObjList.Add(shapeObj);
+                GameObject shapeObj = ShapeFromJSON(shape.id, shape.info);
+                if (shape.info.type == TYPE_DEST.GetHashCode())
+                {
+                    numDest += 1;
+                    shapeObj.transform.GetChild(1).gameObject.GetComponent<TextMeshPro>().text = shape.name;
                 }
+                this.shapeObjList.Add(shapeObj);
             }
         }
     }

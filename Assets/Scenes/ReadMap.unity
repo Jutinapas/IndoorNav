@@ -1329,8 +1329,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shapePrefabs:
-  - {fileID: 1078755997285888, guid: f8f67d766d3ce4631a946298773ec89d, type: 3}
-  - {fileID: 1503411527038776, guid: 9f81d35047d054afe9505b771f8bcffc, type: 3}
+  - {fileID: 2439888384043115410, guid: f84ac45aa1a7d434686911e2e4b5d036, type: 3}
+  - {fileID: 6230715947079206625, guid: 57e0ed4f60dfd470793322eb463080d5, type: 3}
   - {fileID: 1088472916570732, guid: 2fb6925c40ae28d48ba5f0e23edfd914, type: 3}
   shapeObjList: []
   edgeObjList: []

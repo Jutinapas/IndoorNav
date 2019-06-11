@@ -95,6 +95,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
         if (!mARKitInit && LibPlacenote.Instance.Initialized() && mSelectedMapId != null)
         {
             mARKitInit = true;
+            resetButton.SetActive(false);
             statusText.text = "กำลังดาวน์โหลด.." ;
 
             LibPlacenote.Instance.LoadMap(mSelectedMapId,
@@ -106,11 +107,13 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
                         Debug.Log("Starting Session " + mSelectedMapId);
                         statusText.text = "เริ่มค้นหาตำแหน่งใน " + mSelectedMapInfo.metadata.name;
                         currentStage = Stage.NAVI;
+                        resetButton.SetActive(true);
                     }
                     else if (faulted)
                     {
                         Debug.Log("Failed to Load " + mSelectedMapId);
                         statusText.text = "ไม่สามารถดาวน์โหลดได้ ลองใหม่อีกครั้ง";
+                        resetButton.SetActive(true);
                     }
                     else
                     {

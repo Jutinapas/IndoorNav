@@ -125,8 +125,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     void Update()
     {
-
-        if (!mARKitInit && LibPlacenote.Instance.Initialized())
+        if (!mARKitInit)
         {
             mARKitInit = true;
             StartSavingMap();
@@ -189,6 +188,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
         if (!LibPlacenote.Instance.Initialized())
         {
             statusText.text = "เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง";
+            resetButton.SetActive(true);
             return;
         }
 
@@ -225,7 +225,11 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
     public void OnResetConfirmClick()
     {
         //
-        if (currentStage == Stage.MAPPING)
+        if (currentStage == Stage.START)
+        {
+            resetAlert.SetActive(false);
+        }
+        else if (currentStage == Stage.MAPPING)
         {
             resetAlert.SetActive(false);
         }

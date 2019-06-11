@@ -125,7 +125,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
 
     void Update()
     {
-        if (!mARKitInit)
+        if (!mARKitInit && LibPlacenote.Instance.Initialized())
         {
             mARKitInit = true;
             StartSavingMap();

@@ -8,16 +8,16 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Home.unity
     guid: 5004d8e8003c343a6898838c16a03a76
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/HomeCreate.unity
     guid: 36fca8f82d95d4bce89e330fcb5da9dd
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/CreateMap.unity
     guid: c1577ca0f3e4c4bbcaaa7c8107ec5dfc
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/HomeRead.unity
     guid: 39ddd0e01d71f47a5926cbe49026a0af
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/ReadMap.unity
     guid: 7ff821bf32bc1492992d7836af8c28f1
   m_configObjects: {}

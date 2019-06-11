@@ -5,22 +5,21 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using Newtonsoft.Json.Linq;
 
-public class MapInfoElement : MonoBehaviour
+public class MapElement : MonoBehaviour
 {
 	[SerializeField] Text mMapIdText;
 	[SerializeField] Text mLocationText;
-	[SerializeField] Toggle mToggle;
+	[SerializeField] Button mButton;
 
-	public void Initialize (LibPlacenote.MapInfo mapInfo, ToggleGroup toggleGroup,
-	                       RectTransform listParent, UnityAction<bool> onToggleChanged)
+	public void Initialize (LibPlacenote.MapInfo mapInfo, RectTransform listParent, UnityAction onButtonClick)
 	{
 		mMapIdText.text = mapInfo.placeId;
 		if (mapInfo.metadata.name != null && mapInfo.metadata.name.Length > 0) {
 			mMapIdText.text = mapInfo.metadata.name;
 		}
-		mToggle.group = toggleGroup;
+
 		gameObject.transform.SetParent (listParent);
-		mToggle.onValueChanged.AddListener (onToggleChanged);
+		mButton.onClick.AddListener (onButtonClick);
 
 		if (Input.location.status != LocationServiceStatus.Running) {
 			mLocationText.text = "Distance Unknown - No user location";

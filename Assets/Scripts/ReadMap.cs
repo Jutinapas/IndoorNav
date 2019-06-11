@@ -25,9 +25,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     [SerializeField] GameObject resetAlert;
 
     [SerializeField] RectTransform mListContentParent;
-    [SerializeField] ToggleGroup mToggleGroup;
     [SerializeField] RectTransform dListContentParent;
-    [SerializeField] ToggleGroup dToggleGroup;
 
     [SerializeField] Text statusText;
 
@@ -154,9 +152,10 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     void AddMapToList(LibPlacenote.MapInfo mapInfo)
     {
         GameObject newElement = Instantiate(mListElement) as GameObject;
-        MapInfoElement listElement = newElement.GetComponent<MapInfoElement>();
-        listElement.Initialize(mapInfo, mToggleGroup, mListContentParent, (value) =>
+        MapElement listElement = newElement.GetComponent<MapElement>();
+        listElement.Initialize(mapInfo, mListContentParent, () =>
         {
+            Debug.Log(mapInfo.metadata.name);
             OnMapSelected(mapInfo);
         });
     }
@@ -186,7 +185,7 @@ public class ReadMap : MonoBehaviour, PlacenoteListener
     void AddDestToList(NodeShape dest)
     {
         GameObject newElement = Instantiate(dListElement) as GameObject;
-        DestInfoElement listElement = newElement.GetComponent<DestInfoElement>();
+        DestElement listElement = newElement.GetComponent<DestElement>();
         listElement.Initialize(dest, dListContentParent, () =>
         {
             Debug.Log(dest.name);

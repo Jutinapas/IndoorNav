@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using Newtonsoft.Json.Linq;
 
-public class DestInfoElement : MonoBehaviour
+public class DestElement : MonoBehaviour
 {
     [SerializeField] int id;
 	[SerializeField] Text dNameText;

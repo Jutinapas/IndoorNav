@@ -505,6 +505,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                             else
                             {
                                 Debug.Log("ไม่สามารถลบแผนที่ ID: " + map.placeId);
+                                resetButton.SetActive(true);
                             }
                         });
                     }
@@ -592,7 +593,7 @@ public class CreateMap : MonoBehaviour, PlacenoteListener
                     else if (faulted)
                     {
                         statusText.text = "เกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง";
-                        homeButton.SetActive(true);
+                        resetButton.SetActive(true);
                     }
                     else
                     {
